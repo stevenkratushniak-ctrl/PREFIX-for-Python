@@ -2,8 +2,7 @@ Copyright (c) Fast Industries.
 
 All rights reserved.
 
-This repository is a commercial launch candidate for PREFIX for Python.
+This repository contains the commercial PREFIX for Python product.
 No right to copy, modify, distribute, sublicense, or commercially exploit
 this software is granted except by express written permission from
 Fast Industries.
-
