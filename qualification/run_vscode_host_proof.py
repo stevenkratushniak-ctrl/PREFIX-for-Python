@@ -33,6 +33,8 @@ def main() -> int:
     environment["PREFIX_WRONG_ENGINE"] = str(args.wrong_engine.resolve())
     environment["PYTHONPATH"] = str(HARNESS / "timeout_module")
     environment["VSCODE_DISABLE_UPDATE"] = "1"
+    host_workdir = args.user_data_dir / "host-workdir"
+    host_workdir.mkdir(parents=True, exist_ok=True)
     if args.xvfb_run:
         environment["GDK_BACKEND"] = "x11"
         environment["GTK_USE_PORTAL"] = "0"
@@ -73,7 +75,7 @@ def main() -> int:
     command = prefix + base
     runs = []
     for run_number in (1, 2):
-        completed = _run_host(command, environment)
+        completed = _run_host(command, environment, host_workdir)
         combined = completed["stdout"] + completed["stderr"]
         passed = completed["exit_code"] == 0 and not completed["timed_out"] and "PREFIX_VSCODE_HOST_PROOF_OK" in combined
         runs.append({
@@ -101,10 +103,10 @@ def main() -> int:
     return 0 if report["passed"] else 1
 
 
-def _run_host(command: list[str], environment: dict[str, str]) -> dict[str, object]:
+def _run_host(command: list[str], environment: dict[str, str], cwd: Path) -> dict[str, object]:
     process = subprocess.Popen(
         command,
-        cwd=ROOT,
+        cwd=cwd,
         env=environment,
         text=True,
         encoding="utf-8",
