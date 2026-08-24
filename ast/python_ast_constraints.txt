@@ -1,0 +1,121 @@
+PYTHON AST CONSTRAINTS (AUTHORITATIVE)
+
+Purpose:
+Define legal parent → child relationships.
+Invalid transitions are unrepresentable.
+
+====================================================
+TOP-LEVEL CONSTRAINTS
+====================================================
+
+Module:
+- body → [stmt*]
+- type_ignores → [TypeIgnore*]
+
+Interactive:
+- body → [stmt*]
+
+Expression:
+- body → expr
+
+====================================================
+STATEMENT CONSTRAINTS
+====================================================
+
+FunctionDef / AsyncFunctionDef:
+- name → identifier
+- args → arguments
+- body → [stmt+]
+- decorator_list → [expr*]
+- returns → expr | None
+
+ClassDef:
+- name → identifier
+- bases → [expr*]
+- keywords → [keyword*]
+- body → [stmt+]
+- decorator_list → [expr*]
+
+If:
+- test → expr
+- body → [stmt+]
+- orelse → [stmt*]
+
+For / AsyncFor:
+- target → expr (Store)
+- iter → expr
+- body → [stmt+]
+- orelse → [stmt*]
+
+While:
+- test → expr
+- body → [stmt+]
+- orelse → [stmt*]
+
+Try:
+- body → [stmt+]
+- handlers → [ExceptHandler+]
+- orelse → [stmt*]
+- finalbody → [stmt*]
+
+Return:
+- value → expr | None
+
+Assign:
+- targets → [expr+]
+- value → expr
+
+====================================================
+EXPRESSION CONSTRAINTS
+====================================================
+
+Call:
+- func → expr
+- args → [expr*]
+- keywords → [keyword*]
+
+BinOp:
+- left → expr
+- op → operator
+- right → expr
+
+Compare:
+- left → expr
+- ops → [cmpop+]
+- comparators → [expr+]
+
+Name:
+- id → identifier
+- ctx → Load | Store | Del
+
+Attribute:
+- value → expr
+- attr → identifier
+- ctx → Load | Store
+
+====================================================
+INDENTATION / BLOCK RULE (CRITICAL)
+====================================================
+
+Rule:
+Any stmt that introduces a block (If, For, While, Try,
+FunctionDef, ClassDef, With, Match) MUST be followed by:
+
+- At least one indented stmt
+- Indentation level strictly greater than parent
+
+Violation:
+- Invalid AST state
+- Must auto-indent or refuse transition
+
+====================================================
+GLOBAL CONSTRAINT
+====================================================
+
+If a parent/child relationship is not explicitly allowed
+by this specification, it is INVALID.
+
+Invalid transitions must be:
+- deterministically transformed
+OR
+- refused at input time

@@ -1,0 +1,16 @@
+PROJECT: Constrained Python
+VERSION: Python 3.12 (FROZEN)
+
+RULE:
+Invalid Python programs must be unrepresentable at the point of expression.
+
+SCOPE:
+- Python only
+- AST-first construction
+- Real-time enforcement while typing
+- No runtime fixing
+- No system scanning
+- No UIX
+
+STATUS:
+Phase 1 — Constraint Core

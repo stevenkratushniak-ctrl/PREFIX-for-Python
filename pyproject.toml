@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prefix-python"
+version = "0.1.0"
+description = "Deterministic Python prefix layer for bounded correctness."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "Proprietary - Fast Industries launch candidate" }
+authors = [
+  { name = "Fast Industries" }
+]
+keywords = ["python", "deterministic", "prefix-layer", "syntax", "vscode"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: OS Independent",
+  "Environment :: Console",
+  "Topic :: Software Development :: Quality Assurance"
+]
+
+[project.scripts]
+prefix-python = "prefix_python.cli:main"
+prefix-python-ops = "prefix_python.operator_console:main"
+
+[tool.setuptools]
+packages = ["prefix_python"]

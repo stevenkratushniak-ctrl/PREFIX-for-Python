@@ -1,0 +1,14 @@
+Python AST Specification — Working Notes
+
+Version: Python 3.12 (FROZEN)
+
+This file defines:
+- Valid AST node types
+- Legal parent/child relationships
+- Grammar-enforced construction rules
+
+Core Rule:
+Invalid Python AST states must be unrepresentable.
+
+Text is a projection.
+AST is the source of truth.

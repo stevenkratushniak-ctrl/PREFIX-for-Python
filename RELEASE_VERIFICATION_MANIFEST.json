@@ -1,0 +1,192 @@
+{
+    "artifacts":  {
+                      "release_files":  [
+                                            {
+                                                "name":  "DEMO_PREFIX_PYTHON.ps1",
+                                                "sha256":  "e10e3c687ccf0eea967735e44e3f2793971155264ae9873821a08ccd3df5c4ff",
+                                                "size":  1152
+                                            },
+                                            {
+                                                "name":  "INSTALL_PREFIX_PYTHON.ps1",
+                                                "sha256":  "e3570989d74712fd0da211243cc637e998381de56f87c084c32f4f1573dfb35e",
+                                                "size":  1011
+                                            },
+                                            {
+                                                "name":  "prefix-python-0.1.0-rc2.zip",
+                                                "sha256":  "7a92c318ce9be3f93ba97d319d2d1d1ebcba323205b4690c669e70485fb5d82d",
+                                                "size":  94256
+                                            },
+                                            {
+                                                "name":  "prefix-python-0.1.0.vsix",
+                                                "sha256":  "02a332530f55ff785e7f41d5e8004245c21033e7ea27e54dc2df586db757e4bf",
+                                                "size":  22475
+                                            },
+                                            {
+                                                "name":  "prefix_python-0.1.0-py3-none-any.whl",
+                                                "sha256":  "feb085394d9a441d8202e546f2f9c55fd43c2aeaf735e5bb564c455636042b4a",
+                                                "size":  33498
+                                            },
+                                            {
+                                                "name":  "RELEASE_NOTES_v0.1.0.md",
+                                                "sha256":  "550de9dbb063c74fb126ac28f0dbb4e4c356e411cc45842d8ba3d1a75797d2f2",
+                                                "size":  1086
+                                            },
+                                            {
+                                                "name":  "SHA256SUMS.txt",
+                                                "sha256":  "b8ed9480ded428b4accc8536d991824c0feaa1c1e92281af462b4bba64fa936c",
+                                                "size":  563
+                                            }
+                                        ]
+                  },
+    "commands":  {
+                     "cli_corrected_example":  {
+                                                   "exit_code":  0,
+                                                   "name":  "correct_example",
+                                                   "refusal_code":  null,
+                                                   "status":  "ACCEPT_FIXED"
+                                               },
+                     "cli_refused_example":  {
+                                                 "exit_code":  1,
+                                                 "name":  "refused_example",
+                                                 "refusal_code":  "return_outside_function",
+                                                 "status":  "REFUSE_INVALID"
+                                             },
+                     "unittest":  {
+                                      "exit_code":  0,
+                                      "stdout":  ""
+                                  }
+                 },
+    "determinism":  {
+                        "engine_cases_identical":  true,
+                        "extension_package_hash_stable":  true,
+                        "idempotency_ok":  true,
+                        "wheel_hash_stable":  true
+                    },
+    "environment":  {
+                        "python_version":  "3.12.6",
+                        "source_date_epoch":  "1735689600"
+                    },
+    "extension_validation":  {
+                                 "build_ok":  true,
+                                 "build_stdout":  "\u003e prefix-python@0.1.0 build\n\u003e npx --no-install tsc -p .",
+                                 "npm_ci_ok":  true,
+                                 "package_hash":  "02a332530f55ff785e7f41d5e8004245c21033e7ea27e54dc2df586db757e4bf",
+                                 "package_hash_repeat":  "02a332530f55ff785e7f41d5e8004245c21033e7ea27e54dc2df586db757e4bf",
+                                 "package_hash_stable":  true,
+                                 "package_ok":  true,
+                                 "vsix_path":  "C:\\PREFIX_PYTHON\\release\\prefix-python-0.1.0.vsix"
+                             },
+    "install_validation":  {
+                               "passes":  [
+                                              {
+                                                  "corrected_status":  "ACCEPT_FIXED",
+                                                  "label":  "install_a",
+                                                  "version_output":  "prefix-python 0.1.0"
+                                              },
+                                              {
+                                                  "corrected_status":  "ACCEPT_FIXED",
+                                                  "label":  "install_b",
+                                                  "version_output":  "prefix-python 0.1.0"
+                                              }
+                                          ],
+                               "wheel":  "prefix_python-0.1.0-py3-none-any.whl"
+                           },
+    "qualification":  {
+                          "adversarial_ok":  true,
+                          "refusal_ok":  true,
+                          "stress_ok":  true
+                      },
+    "reference_inventory":  [
+                                {
+                                    "name":  "CATEGORY_POSITIONING.md",
+                                    "path":  "C:\\PREFIX_PYTHON\\CATEGORY_POSITIONING.md",
+                                    "sha256":  "ddaaa06035e899b76aa7a306cc3de3cb9756787f655bf477ce04d4e67736eeab",
+                                    "size":  1616
+                                },
+                                {
+                                    "name":  "FOUNDING_OPERATOR_RELEASE_DEMO.ps1",
+                                    "path":  "C:\\PREFIX_PYTHON\\demo\\FOUNDING_OPERATOR_RELEASE_DEMO.ps1",
+                                    "sha256":  "cb1071ee3a98e9497042a479e2377910fafbf7adc55bc93a8bedbcbbe2aa81c3",
+                                    "size":  2821
+                                },
+                                {
+                                    "name":  "extension.ts",
+                                    "path":  "C:\\PREFIX_PYTHON\\editor\\vscode\\extension.ts",
+                                    "sha256":  "efd26b618c8334381cf03dd90edcf72cc15a0476b2d8f43e2445a044b959f1a7",
+                                    "size":  17082
+                                },
+                                {
+                                    "name":  "ENTERPRISE_VALUE_PROPOSITION.md",
+                                    "path":  "C:\\PREFIX_PYTHON\\ENTERPRISE_VALUE_PROPOSITION.md",
+                                    "sha256":  "80648ba27850e567fd490f4fccc63d3025d24434acdafa71a83b9f4ab06c4617",
+                                    "size":  1627
+                                },
+                                {
+                                    "name":  "FOUNDING_OPERATOR_PROGRAM.md",
+                                    "path":  "C:\\PREFIX_PYTHON\\FOUNDING_OPERATOR_PROGRAM.md",
+                                    "sha256":  "9e69bac8b9b1ec98b90445832e09a5f8863cdf0afeb100df975961100c2cdcd8",
+                                    "size":  2093
+                                },
+                                {
+                                    "name":  "PRICING.md",
+                                    "path":  "C:\\PREFIX_PYTHON\\launch\\PRICING.md",
+                                    "sha256":  "c4277d1792e66fccdeb862e2f0a496116229cd37940072ee3fb391d11d260553",
+                                    "size":  2339
+                                },
+                                {
+                                    "name":  "PRODUCT_HUNT.md",
+                                    "path":  "C:\\PREFIX_PYTHON\\launch\\PRODUCT_HUNT.md",
+                                    "sha256":  "32a6d10a6f5b97cde0368e2540ca85b5e2ff74547294dac37a53e9e1cda1edc4",
+                                    "size":  1673
+                                },
+                                {
+                                    "name":  "PILOT_ONBOARDING_PACKET.md",
+                                    "path":  "C:\\PREFIX_PYTHON\\PILOT_ONBOARDING_PACKET.md",
+                                    "sha256":  "d844a3e3cda40ee19527a33f9dacef3d2368d6aeb149cd2a86c3ae9b0d7ce626",
+                                    "size":  1358
+                                },
+                                {
+                                    "name":  "PREFIX_FOUNDING_OPERATOR_RELEASE_HARDENING_REPORT.md",
+                                    "path":  "C:\\PREFIX_PYTHON\\PREFIX_FOUNDING_OPERATOR_RELEASE_HARDENING_REPORT.md",
+                                    "sha256":  "20edbbb3530042bb3f20361980ae085b463118c1751b824062c8f762cea86a8e",
+                                    "size":  5008
+                                },
+                                {
+                                    "name":  "PREFIX_OPERATOR_CONSOLE_PLAN.md",
+                                    "path":  "C:\\PREFIX_PYTHON\\PREFIX_OPERATOR_CONSOLE_PLAN.md",
+                                    "sha256":  "25e3e67f916564ba0308b647f505b11903250b3fe4e571ff208847a759432b68",
+                                    "size":  2750
+                                },
+                                {
+                                    "name":  "PRICING_AND_PACKAGING.md",
+                                    "path":  "C:\\PREFIX_PYTHON\\PRICING_AND_PACKAGING.md",
+                                    "sha256":  "cc117fa69b14d1876c15a1e8d649faf69db326bc69265b2873f14b69f19d5fa3",
+                                    "size":  2419
+                                },
+                                {
+                                    "name":  "PYTHON_3_12_AST_RULE_CATALOG.md",
+                                    "path":  "C:\\PREFIX_PYTHON\\PYTHON_3_12_AST_RULE_CATALOG.md",
+                                    "sha256":  "3babec2366cacb8ed1e9b15d929a42cc21fd1326d741ff7337a5187eb8385770",
+                                    "size":  2880
+                                },
+                                {
+                                    "name":  "README.md",
+                                    "path":  "C:\\PREFIX_PYTHON\\README.md",
+                                    "sha256":  "890147911f3ed7bb5cb19d7e15fb16b7a06f4951bbd4b16e7671fb84efdb11f9",
+                                    "size":  9152
+                                }
+                            ],
+    "reports":  {
+                    "ADVERSARIAL_REPORT.json":  "5fa7d603a0f3294978fcb86023424d5f77f9e06dbe86353d6a631a9a351e5024",
+                    "DETERMINISM_REPORT.json":  "6def97844492e4c993b18f3048a53c3fe6b49605be03bd5559386306a2cc208b",
+                    "REFUSAL_REPORT.json":  "25fcda5ffdded5c997058111270d24c58999a560f6b5d20694f70e2cf2fdd6ea",
+                    "STRESS_REPORT.json":  "e03fb0ff0cb3397cc8be30edcca7bb63931928e0ba5459a84e104a8fa702727c"
+                },
+    "version":  "0.1.0",
+    "wheel_rebuild":  {
+                          "first_hash":  "feb085394d9a441d8202e546f2f9c55fd43c2aeaf735e5bb564c455636042b4a",
+                          "hashes_identical":  true,
+                          "second_hash":  "feb085394d9a441d8202e546f2f9c55fd43c2aeaf735e5bb564c455636042b4a",
+                          "wheel_path":  "C:\\PREFIX_PYTHON\\release\\prefix_python-0.1.0-py3-none-any.whl"
+                      }
+}

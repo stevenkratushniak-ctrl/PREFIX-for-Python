@@ -1,0 +1,63 @@
+{
+  "cli": [
+    {
+      "exit_code": 1,
+      "name": "missing_path",
+      "refusal_code": "path_missing",
+      "status": "REFUSE_INVALID"
+    },
+    {
+      "exit_code": 1,
+      "name": "path_not_file",
+      "refusal_code": "path_not_file",
+      "status": "REFUSE_INVALID"
+    },
+    {
+      "exit_code": 1,
+      "name": "decode_error",
+      "refusal_code": "input_decode_error",
+      "status": "REFUSE_INVALID"
+    },
+    {
+      "detail": "[WinError 1314] A required privilege is not held by the client: 'C:\\\\PREFIX_PYTHON\\\\qualification\\\\_work\\\\symlink-target.py' -> 'C:\\\\PREFIX_PYTHON\\\\qualification\\\\_work\\\\symlink-link.py'",
+      "exit_code": 0,
+      "name": "symlink_write_refusal",
+      "status": "skipped"
+    }
+  ],
+  "engine": [
+    {
+      "name": "return_outside_function",
+      "output_sha256": "0805bfdc02e872ed322a4a4e440ae985f3a4335f4dd59f3d373dfaf2a68a4a3c",
+      "refusal_code": "return_outside_function",
+      "refusal_reason": "PREFIX refused the transition because `return` outside a function has no lawful deterministic repair.",
+      "status": "REFUSE_INVALID"
+    },
+    {
+      "name": "orphaned_else",
+      "output_sha256": "05eabbfa52320c92635b9a6a2aa245acfa202c79c04815d4e8cb1d970b2a5321",
+      "refusal_code": "orphaned_else",
+      "refusal_reason": "PREFIX refused the transition because orphaned `else` does not admit a singular deterministic correction.",
+      "status": "REFUSE_INVALID"
+    },
+    {
+      "name": "nul_bytes",
+      "output_sha256": "fb4ce9527bd3e642b0e004f69d5d78319d18bf981a28331c3d4f64318de23c14",
+      "refusal_code": "input_contains_nul",
+      "refusal_reason": "PREFIX refused the transition because source containing NUL bytes is outside the admissible input surface.",
+      "status": "REFUSE_INVALID"
+    },
+    {
+      "name": "oversized",
+      "output_sha256": "154b8ed3c2383ce429058768595935faf7851b5c38db2b1732594be1d88bc05a",
+      "refusal_code": "input_too_large",
+      "refusal_reason": "PREFIX refused the transition because the input exceeds the 1048576-byte release boundary.",
+      "status": "REFUSE_INVALID"
+    }
+  ],
+  "summary": {
+    "all_cli_cases_refused": true,
+    "all_engine_cases_refused": true,
+    "symlink_case_executed": false
+  }
+}

@@ -1,0 +1,178 @@
+{
+  "cases": [
+    {
+      "all_payloads_identical": true,
+      "all_statuses_identical": true,
+      "input_sha256": "e47eda2a8c6b2430004815eb99016ffb0a4f2cc7352609332c6b52c469aabebf",
+      "iterations": 10,
+      "name": "valid_simple",
+      "payload_hash": "c1b996c37da3908bf9f28f0dd78626d10099605cc6a5a84502dabe0aeb9d55e1",
+      "status": "ACCEPT_VALID"
+    },
+    {
+      "all_payloads_identical": true,
+      "all_statuses_identical": true,
+      "input_sha256": "3fa06faf18235329f4833fb8dd40835ebeab780ca4bb0b7c798aa338d7b98446",
+      "iterations": 10,
+      "name": "missing_colon_indent",
+      "payload_hash": "32b2385ad0619518df99afed04de8fe2cf0e839dc667a8db04bb1e0f954ce720",
+      "status": "ACCEPT_FIXED"
+    },
+    {
+      "all_payloads_identical": true,
+      "all_statuses_identical": true,
+      "input_sha256": "6a62abe6cc06e900c811b5454dfa5fad94cd32fc0a0d3268830b845b36342ab2",
+      "iterations": 10,
+      "name": "empty_function",
+      "payload_hash": "6ea63a6be3b82b5a490ddf00137f8b62b2e47ed4d6890cdd7196b1e5a0d0c54c",
+      "status": "ACCEPT_FIXED"
+    },
+    {
+      "all_payloads_identical": true,
+      "all_statuses_identical": true,
+      "input_sha256": "a0ed8b0da7e40b7809c8fd81fce937a2d239691f27de38691d100ac52d74d886",
+      "iterations": 10,
+      "name": "assignment_rhs",
+      "payload_hash": "62a80c8972bfd51c8875a326ce69b4196eeeef2db014890d1ad7dc446730baf6",
+      "status": "REFUSE_UNMAPPED"
+    },
+    {
+      "all_payloads_identical": true,
+      "all_statuses_identical": true,
+      "input_sha256": "caa48aaee656868fbbd4d653a94c8fb9e6d469ae98d1474964f1d333554586a2",
+      "iterations": 10,
+      "name": "trailing_operator",
+      "payload_hash": "adba8c47b902f1509b9f2b190a8d986e10c9c168dea42d0aab95e87ce3a0af01",
+      "status": "REFUSE_UNMAPPED"
+    },
+    {
+      "all_payloads_identical": true,
+      "all_statuses_identical": true,
+      "input_sha256": "7e9057085b5873a080831b3814d682d207398238c0eeda253e1942d9f9db38e1",
+      "iterations": 10,
+      "name": "unmatched_delimiter",
+      "payload_hash": "a12f55ce5b968af6ac097a4026f6a4c79190db420a45435c941338c6c36a01f9",
+      "status": "ACCEPT_FIXED"
+    },
+    {
+      "all_payloads_identical": true,
+      "all_statuses_identical": true,
+      "input_sha256": "43af2fb49eeebd43cb8d2ff1aec25eecbb871b4927f173c0e52aff89c4ed2aa6",
+      "iterations": 10,
+      "name": "orphaned_elif",
+      "payload_hash": "3a95f22fe4e0f2b889df3df28df57a45c1071505ad484a9e6e73902bd9456de2",
+      "status": "REFUSE_UNMAPPED"
+    },
+    {
+      "all_payloads_identical": true,
+      "all_statuses_identical": true,
+      "input_sha256": "cd13916c24b285acbdfcc85c6b26b8641aa19744bb08949175b677edbb81eaa0",
+      "iterations": 10,
+      "name": "tab_normalization",
+      "payload_hash": "ba692f691eb4722ef1831524792d105b75c9f2b1664b6a4b70f5c4ef043733c6",
+      "status": "ACCEPT_FIXED"
+    },
+    {
+      "all_payloads_identical": true,
+      "all_statuses_identical": true,
+      "input_sha256": "bb94bc82113249e4829b168032a49a9a6a2170dca24b1cd9af1919173cbee2f3",
+      "iterations": 10,
+      "name": "unsupported_return",
+      "payload_hash": "f929081acc443a05055c3f80339e5b363a948e61c2ebc017676701ce89d95065",
+      "status": "REFUSE_INVALID"
+    },
+    {
+      "all_payloads_identical": true,
+      "all_statuses_identical": true,
+      "input_sha256": "c181d2fc024c7084d1f0f51ac79f1153ed513095238725630a975ab9fb7ef43a",
+      "iterations": 10,
+      "name": "broken_missing_colon_fixture",
+      "payload_hash": "c8d987183140e1d7b20026d3356ee254e68a8f2b16db12d034c823e34642b8b5",
+      "status": "ACCEPT_FIXED"
+    },
+    {
+      "all_payloads_identical": true,
+      "all_statuses_identical": true,
+      "input_sha256": "22a5b808ff5a3282629e2adfb2d2d3aed0f15205473b74f1348e8f30ac531c3f",
+      "iterations": 10,
+      "name": "broken_return_outside_function_fixture",
+      "payload_hash": "c16db9c113f2911527b2e4dec6a049ae03ce72873b2013456dc122d6c963455b",
+      "status": "REFUSE_INVALID"
+    }
+  ],
+  "environment": {
+    "platform": "win32",
+    "python_executable": "C:\\Program Files\\Python312\\python.exe",
+    "python_version": "3.12.6"
+  },
+  "idempotency": [
+    {
+      "first_status": "ACCEPT_VALID",
+      "idempotent": true,
+      "name": "valid_simple",
+      "second_event_count": 0,
+      "second_status": "ACCEPT_VALID"
+    },
+    {
+      "first_status": "ACCEPT_FIXED",
+      "idempotent": true,
+      "name": "missing_colon_indent",
+      "second_event_count": 0,
+      "second_status": "ACCEPT_VALID"
+    },
+    {
+      "first_status": "ACCEPT_FIXED",
+      "idempotent": true,
+      "name": "empty_function",
+      "second_event_count": 0,
+      "second_status": "ACCEPT_VALID"
+    },
+    {
+      "first_status": "REFUSE_UNMAPPED",
+      "idempotent": true,
+      "name": "assignment_rhs",
+      "second_event_count": 0,
+      "second_status": "REFUSE_UNMAPPED"
+    },
+    {
+      "first_status": "REFUSE_UNMAPPED",
+      "idempotent": true,
+      "name": "trailing_operator",
+      "second_event_count": 0,
+      "second_status": "REFUSE_UNMAPPED"
+    },
+    {
+      "first_status": "ACCEPT_FIXED",
+      "idempotent": true,
+      "name": "unmatched_delimiter",
+      "second_event_count": 0,
+      "second_status": "ACCEPT_VALID"
+    },
+    {
+      "first_status": "REFUSE_UNMAPPED",
+      "idempotent": true,
+      "name": "orphaned_elif",
+      "second_event_count": 0,
+      "second_status": "REFUSE_UNMAPPED"
+    },
+    {
+      "first_status": "ACCEPT_FIXED",
+      "idempotent": true,
+      "name": "tab_normalization",
+      "second_event_count": 0,
+      "second_status": "ACCEPT_VALID"
+    },
+    {
+      "first_status": "REFUSE_INVALID",
+      "idempotent": true,
+      "name": "unsupported_return",
+      "second_event_count": 0,
+      "second_status": "REFUSE_INVALID"
+    }
+  ],
+  "summary": {
+    "all_cases_identical": true,
+    "all_cases_same_status": true,
+    "idempotency_ok": true
+  }
+}

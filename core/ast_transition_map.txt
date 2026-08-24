@@ -1,0 +1,30 @@
+AST TRANSITION MAP (FINITE)
+
+Rule Format:
+[Invalid Transition] -> [Deterministic Correction]
+
+Examples:
+
+- "if x" + Enter
+  -> Missing colon
+  -> Auto-insert ":"
+
+- Newline without block indent
+  -> Invalid block continuation
+  -> Auto-indent to next valid level
+
+- Unmatched "("
+  -> Illegal AST state
+  -> Auto-close ")"
+
+- Dedent without block close
+  -> Invalid structure
+  -> Auto-align or auto-close block
+
+- Keyword in illegal position
+  -> Illegal grammar
+  -> Refuse or surface candidate-only repair
+
+Global Rule:
+If a transition cannot be corrected deterministically,
+it must be refused.

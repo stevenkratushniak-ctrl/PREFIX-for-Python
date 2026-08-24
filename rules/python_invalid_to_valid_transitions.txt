@@ -1,0 +1,149 @@
+PYTHON INVALID → VALID AST TRANSITION RULES
+Version: Python 3.12 (Frozen)
+
+Definition:
+An invalid transition is any edit that would produce
+an AST not allowed by python_ast_constraints.txt.
+
+All invalid transitions MUST be transformed or refused.
+
+====================================================
+CLASS 1 — BLOCK INTRODUCTION ERRORS
+====================================================
+
+INVALID:
+"If x" + Enter
+REASON:
+Missing ':' for block introduction
+TRANSFORM:
+Auto-insert ':' before newline
+
+INVALID:
+"for i in x" + Enter
+REASON:
+Missing ':' for block introduction
+TRANSFORM:
+Auto-insert ':'
+
+INVALID:
+"while condition" + Enter
+TRANSFORM:
+Auto-insert ':'
+
+====================================================
+CLASS 2 — INDENTATION ERRORS
+====================================================
+
+INVALID:
+Newline after block without indentation
+REASON:
+Block requires indented body
+TRANSFORM:
+Auto-indent to parent + 1 level
+
+INVALID:
+Dedent while block still open
+REASON:
+Block not closed
+TRANSFORM:
+Auto-close block or align dedent correctly
+
+INVALID:
+Mixed tabs/spaces
+TRANSFORM:
+Normalize to spaces (PEP8 default)
+
+====================================================
+CLASS 3 — DELIMITER ERRORS
+====================================================
+
+INVALID:
+Unmatched '('
+TRANSFORM:
+Auto-close ')'
+
+INVALID:
+Unmatched '['
+TRANSFORM:
+Auto-close ']'
+
+INVALID:
+Unmatched '{'
+TRANSFORM:
+Auto-close '}'
+
+INVALID:
+Extra closing delimiter
+TRANSFORM:
+Remove delimiter or relocate to nearest valid node
+
+====================================================
+CLASS 4 — ASSIGNMENT / EXPRESSION ERRORS
+====================================================
+
+INVALID:
+Assignment without RHS
+Example:
+x =
+TRANSFORM:
+Refuse transition (semantic default value would be a guess)
+
+INVALID:
+Binary operator without operand
+Example:
+x +
+TRANSFORM:
+Refuse transition (semantic default value would be a guess)
+
+====================================================
+CLASS 5 — KEYWORD MISPLACEMENT
+====================================================
+
+INVALID:
+Keyword in illegal position
+Example:
+return outside function
+TRANSFORM:
+Refuse transition (cannot auto-correct deterministically)
+
+INVALID:
+elif without if
+TRANSFORM:
+Surface candidate-only repair (`elif` -> `if`) or refuse
+
+====================================================
+CLASS 6 — NAME / REFERENCE ERRORS (DETERMINISTIC ONLY)
+====================================================
+
+INVALID:
+Use of undefined name in same scope
+TRANSFORM:
+Refuse transition unless a future pinned rule proves a singular lawful repair
+
+NOTE:
+Only applies when deterministic (single valid resolution).
+
+====================================================
+CLASS 7 — FUNCTION / CLASS STRUCTURE
+====================================================
+
+INVALID:
+FunctionDef without body
+TRANSFORM:
+Insert 'pass'
+
+INVALID:
+ClassDef without body
+TRANSFORM:
+Insert 'pass'
+
+====================================================
+GLOBAL RULE
+====================================================
+
+If an invalid transition:
+- has a single deterministic correction → APPLY IT
+- has multiple possible corrections → REFUSE WITH CANDIDATES
+- has no valid correction → REFUSE INPUT
+
+At no time may an invalid AST state be committed.

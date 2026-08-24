@@ -1,0 +1,160 @@
+{
+  "cases": [
+    {
+      "expected_refusal_code": "return_outside_function",
+      "expected_status": "REFUSE_INVALID",
+      "matched_expectation": true,
+      "name": "return_outside_function",
+      "output_sha256": "bb94bc82113249e4829b168032a49a9a6a2170dca24b1cd9af1919173cbee2f3",
+      "refusal_code": "return_outside_function",
+      "status": "REFUSE_INVALID"
+    },
+    {
+      "expected_refusal_code": "orphaned_else",
+      "expected_status": "REFUSE_INVALID",
+      "matched_expectation": true,
+      "name": "orphaned_else",
+      "output_sha256": "e370814bc0ee86975c0cb2fbc29edd821811c87bca3d1f6e431290101079b19f",
+      "refusal_code": "orphaned_else",
+      "status": "REFUSE_INVALID"
+    },
+    {
+      "expected_refusal_code": "input_contains_nul",
+      "expected_status": "REFUSE_INVALID",
+      "matched_expectation": true,
+      "name": "nul_byte",
+      "output_sha256": "fb4ce9527bd3e642b0e004f69d5d78319d18bf981a28331c3d4f64318de23c14",
+      "refusal_code": "input_contains_nul",
+      "status": "REFUSE_INVALID"
+    },
+    {
+      "expected_refusal_code": "input_too_large",
+      "expected_status": "REFUSE_INVALID",
+      "matched_expectation": true,
+      "name": "oversized_input",
+      "output_sha256": "154b8ed3c2383ce429058768595935faf7851b5c38db2b1732594be1d88bc05a",
+      "refusal_code": "input_too_large",
+      "status": "REFUSE_INVALID"
+    },
+    {
+      "expected_refusal_code": "continue_outside_loop",
+      "expected_status": "REFUSE_INVALID",
+      "matched_expectation": true,
+      "name": "continue_outside_loop",
+      "output_sha256": "7134fe6667b4b2287cb806d21d2f2488b9b2077f52c6b8e06b16a4aa27c1cc13",
+      "refusal_code": "continue_outside_loop",
+      "status": "REFUSE_INVALID"
+    },
+    {
+      "expected_refusal_code": null,
+      "expected_status": "ACCEPT_FIXED",
+      "matched_expectation": true,
+      "name": "special_chars_filename",
+      "output_sha256": "cdcfbaa65f9a5bb8fc87a3fdcb64569ba778abe2380f5b6fd4e0ea0a2e9f70b2",
+      "refusal_code": null,
+      "status": "ACCEPT_FIXED"
+    }
+  ],
+  "reference_inventory": [
+    {
+      "name": "CATEGORY_POSITIONING.md",
+      "path": "C:\\PREFIX_PYTHON\\CATEGORY_POSITIONING.md",
+      "sha256": "ddaaa06035e899b76aa7a306cc3de3cb9756787f655bf477ce04d4e67736eeab",
+      "size": 1616
+    },
+    {
+      "name": "FOUNDING_OPERATOR_RELEASE_DEMO.ps1",
+      "path": "C:\\PREFIX_PYTHON\\demo\\FOUNDING_OPERATOR_RELEASE_DEMO.ps1",
+      "sha256": "cb1071ee3a98e9497042a479e2377910fafbf7adc55bc93a8bedbcbbe2aa81c3",
+      "size": 2821
+    },
+    {
+      "name": "extension.ts",
+      "path": "C:\\PREFIX_PYTHON\\editor\\vscode\\extension.ts",
+      "sha256": "efd26b618c8334381cf03dd90edcf72cc15a0476b2d8f43e2445a044b959f1a7",
+      "size": 17082
+    },
+    {
+      "name": "ENTERPRISE_VALUE_PROPOSITION.md",
+      "path": "C:\\PREFIX_PYTHON\\ENTERPRISE_VALUE_PROPOSITION.md",
+      "sha256": "80648ba27850e567fd490f4fccc63d3025d24434acdafa71a83b9f4ab06c4617",
+      "size": 1627
+    },
+    {
+      "name": "FOUNDING_OPERATOR_PROGRAM.md",
+      "path": "C:\\PREFIX_PYTHON\\FOUNDING_OPERATOR_PROGRAM.md",
+      "sha256": "9e69bac8b9b1ec98b90445832e09a5f8863cdf0afeb100df975961100c2cdcd8",
+      "size": 2093
+    },
+    {
+      "name": "PRICING.md",
+      "path": "C:\\PREFIX_PYTHON\\launch\\PRICING.md",
+      "sha256": "c4277d1792e66fccdeb862e2f0a496116229cd37940072ee3fb391d11d260553",
+      "size": 2339
+    },
+    {
+      "name": "PRODUCT_HUNT.md",
+      "path": "C:\\PREFIX_PYTHON\\launch\\PRODUCT_HUNT.md",
+      "sha256": "32a6d10a6f5b97cde0368e2540ca85b5e2ff74547294dac37a53e9e1cda1edc4",
+      "size": 1673
+    },
+    {
+      "name": "PILOT_ONBOARDING_PACKET.md",
+      "path": "C:\\PREFIX_PYTHON\\PILOT_ONBOARDING_PACKET.md",
+      "sha256": "d844a3e3cda40ee19527a33f9dacef3d2368d6aeb149cd2a86c3ae9b0d7ce626",
+      "size": 1358
+    },
+    {
+      "name": "PREFIX_FOUNDING_OPERATOR_RELEASE_HARDENING_REPORT.md",
+      "path": "C:\\PREFIX_PYTHON\\PREFIX_FOUNDING_OPERATOR_RELEASE_HARDENING_REPORT.md",
+      "sha256": "20edbbb3530042bb3f20361980ae085b463118c1751b824062c8f762cea86a8e",
+      "size": 5008
+    },
+    {
+      "name": "PREFIX_OPERATOR_CONSOLE_PLAN.md",
+      "path": "C:\\PREFIX_PYTHON\\PREFIX_OPERATOR_CONSOLE_PLAN.md",
+      "sha256": "25e3e67f916564ba0308b647f505b11903250b3fe4e571ff208847a759432b68",
+      "size": 2750
+    },
+    {
+      "name": "PRICING_AND_PACKAGING.md",
+      "path": "C:\\PREFIX_PYTHON\\PRICING_AND_PACKAGING.md",
+      "sha256": "cc117fa69b14d1876c15a1e8d649faf69db326bc69265b2873f14b69f19d5fa3",
+      "size": 2419
+    },
+    {
+      "name": "PYTHON_3_12_AST_RULE_CATALOG.md",
+      "path": "C:\\PREFIX_PYTHON\\PYTHON_3_12_AST_RULE_CATALOG.md",
+      "sha256": "3babec2366cacb8ed1e9b15d929a42cc21fd1326d741ff7337a5187eb8385770",
+      "size": 2880
+    },
+    {
+      "name": "README.md",
+      "path": "C:\\PREFIX_PYTHON\\README.md",
+      "sha256": "890147911f3ed7bb5cb19d7e15fb16b7a06f4951bbd4b16e7671fb84efdb11f9",
+      "size": 9152
+    }
+  ],
+  "security": {
+    "extension_has_shell_false": true,
+    "extension_has_timeout_kill": true,
+    "extension_mentions_network": false,
+    "python_network_imports": [],
+    "python_subprocess_imports": [],
+    "python_write_targets": [
+      "explicit input path via --write only",
+      "same-directory temp file during atomic replace"
+    ]
+  },
+  "special_path_case": {
+    "exit_code": 0,
+    "matched_expectation": true,
+    "path": "semi;colon[case].py",
+    "status": "ACCEPT_FIXED"
+  },
+  "summary": {
+    "all_cases_matched": true,
+    "network_imports_detected": false,
+    "special_path_case_ok": true
+  }
+}

@@ -1,0 +1,264 @@
+{
+  "cases": [
+    {
+      "case": "missing_colon",
+      "elapsed_ms": 1.939,
+      "event_count": 2,
+      "output_sha256": "cdcfbaa65f9a5bb8fc87a3fdcb64569ba778abe2380f5b6fd4e0ea0a2e9f70b2",
+      "refusal_code": null,
+      "status": "ACCEPT_FIXED"
+    },
+    {
+      "case": "empty_function",
+      "elapsed_ms": 25.922,
+      "event_count": 1,
+      "output_sha256": "17134162ae433aa66a7a7327bac5c1d23c2623c23bfa8cd6263f01a904e7c667",
+      "refusal_code": null,
+      "status": "ACCEPT_FIXED"
+    },
+    {
+      "case": "assignment_rhs",
+      "elapsed_ms": 0.362,
+      "event_count": 0,
+      "output_sha256": "a0ed8b0da7e40b7809c8fd81fce937a2d239691f27de38691d100ac52d74d886",
+      "refusal_code": "assignment_rhs_unmapped",
+      "status": "REFUSE_UNMAPPED"
+    },
+    {
+      "case": "unmatched_delimiter",
+      "elapsed_ms": 0.827,
+      "event_count": 1,
+      "output_sha256": "e47eda2a8c6b2430004815eb99016ffb0a4f2cc7352609332c6b52c469aabebf",
+      "refusal_code": null,
+      "status": "ACCEPT_FIXED"
+    },
+    {
+      "case": "trailing_operator",
+      "elapsed_ms": 0.303,
+      "event_count": 0,
+      "output_sha256": "caa48aaee656868fbbd4d653a94c8fb9e6d469ae98d1474964f1d333554586a2",
+      "refusal_code": "trailing_operator_unmapped",
+      "status": "REFUSE_UNMAPPED"
+    },
+    {
+      "case": "orphaned_elif",
+      "elapsed_ms": 0.311,
+      "event_count": 0,
+      "output_sha256": "43af2fb49eeebd43cb8d2ff1aec25eecbb871b4927f173c0e52aff89c4ed2aa6",
+      "refusal_code": "elif_requires_explicit_authority",
+      "status": "REFUSE_UNMAPPED"
+    },
+    {
+      "case": "unicode_identifiers",
+      "elapsed_ms": 2.745,
+      "event_count": 1,
+      "output_sha256": "14e818d8d11cc53b2394602a227ef0dba3bcaadf3db641f7c0553158b4a53821",
+      "refusal_code": null,
+      "status": "ACCEPT_FIXED"
+    }
+  ],
+  "cli_batch": {
+    "failure_count": 0,
+    "iterations": 24,
+    "results": [
+      {
+        "exit_code": 0,
+        "path": "case_00.py",
+        "status": "ACCEPT_FIXED"
+      },
+      {
+        "exit_code": 1,
+        "path": "case_01.py",
+        "status": "REFUSE_INVALID"
+      },
+      {
+        "exit_code": 0,
+        "path": "case_02.py",
+        "status": "ACCEPT_VALID"
+      },
+      {
+        "exit_code": 0,
+        "path": "case_03.py",
+        "status": "ACCEPT_FIXED"
+      },
+      {
+        "exit_code": 1,
+        "path": "case_04.py",
+        "status": "REFUSE_INVALID"
+      },
+      {
+        "exit_code": 0,
+        "path": "case_05.py",
+        "status": "ACCEPT_VALID"
+      },
+      {
+        "exit_code": 0,
+        "path": "case_06.py",
+        "status": "ACCEPT_FIXED"
+      },
+      {
+        "exit_code": 1,
+        "path": "case_07.py",
+        "status": "REFUSE_INVALID"
+      },
+      {
+        "exit_code": 0,
+        "path": "case_08.py",
+        "status": "ACCEPT_VALID"
+      },
+      {
+        "exit_code": 0,
+        "path": "case_09.py",
+        "status": "ACCEPT_FIXED"
+      },
+      {
+        "exit_code": 1,
+        "path": "case_10.py",
+        "status": "REFUSE_INVALID"
+      },
+      {
+        "exit_code": 0,
+        "path": "case_11.py",
+        "status": "ACCEPT_VALID"
+      }
+    ],
+    "status_counts": {
+      "corrected": 8,
+      "refused": 8,
+      "valid": 8
+    }
+  },
+  "concurrency": {
+    "all_payloads_identical": true,
+    "iterations": 64,
+    "payload_hash": "32b2385ad0619518df99afed04de8fe2cf0e839dc667a8db04bb1e0f954ce720"
+  },
+  "extension": {
+    "build_ok": true,
+    "build_stdout": "> prefix-python@0.1.0 build\n> npx --no-install tsc -p .",
+    "npm_ci_ok": true,
+    "package_hash": "02a332530f55ff785e7f41d5e8004245c21033e7ea27e54dc2df586db757e4bf",
+    "package_hash_repeat": "02a332530f55ff785e7f41d5e8004245c21033e7ea27e54dc2df586db757e4bf",
+    "package_hash_stable": true,
+    "package_ok": true,
+    "vsix_path": "C:\\PREFIX_PYTHON\\release\\prefix-python-0.1.0.vsix"
+  },
+  "fuzz": {
+    "counts": {
+      "corrected": 1,
+      "refused": 249,
+      "valid": 0
+    },
+    "exception_count": 0,
+    "iterations": 250,
+    "samples": [
+      {
+        "case": 0,
+        "input_sha256": "ab62601492d3c28abd686183ae793c6364879c52bffb37f3ddc1101d317114d6",
+        "output_sha256": "ab62601492d3c28abd686183ae793c6364879c52bffb37f3ddc1101d317114d6",
+        "status": "REFUSE_UNMAPPED"
+      },
+      {
+        "case": 1,
+        "input_sha256": "b61bfaa2e7c01356fb7825f7268cb752ce82ddb6f0637ee75a1b66938d40f079",
+        "output_sha256": "b61bfaa2e7c01356fb7825f7268cb752ce82ddb6f0637ee75a1b66938d40f079",
+        "status": "REFUSE_UNMAPPED"
+      },
+      {
+        "case": 2,
+        "input_sha256": "14071b02367f37d40ab585680f131636401303a39547d34472360dba79962087",
+        "output_sha256": "14071b02367f37d40ab585680f131636401303a39547d34472360dba79962087",
+        "status": "REFUSE_UNMAPPED"
+      },
+      {
+        "case": 3,
+        "input_sha256": "8780e44ba5f2bf4dd79e4976f03074aa735192cac9f2c60c64bbc75c27d06d88",
+        "output_sha256": "8780e44ba5f2bf4dd79e4976f03074aa735192cac9f2c60c64bbc75c27d06d88",
+        "status": "REFUSE_UNMAPPED"
+      },
+      {
+        "case": 4,
+        "input_sha256": "9f57340d4579a954780410f22785fffa9c3c0bdd7b90c4b7d2f2913d18e03ba5",
+        "output_sha256": "9f57340d4579a954780410f22785fffa9c3c0bdd7b90c4b7d2f2913d18e03ba5",
+        "status": "REFUSE_UNMAPPED"
+      },
+      {
+        "case": 5,
+        "input_sha256": "8a3755fa69e17a785b1a5480c3748face27b4e2903988395fa55a30ee6d4a9b9",
+        "output_sha256": "8a3755fa69e17a785b1a5480c3748face27b4e2903988395fa55a30ee6d4a9b9",
+        "status": "REFUSE_UNMAPPED"
+      },
+      {
+        "case": 6,
+        "input_sha256": "2a157ea74ba05e1e4b94c09cbd886ea133437b8da34fcadf038ee437419a41d2",
+        "output_sha256": "2a157ea74ba05e1e4b94c09cbd886ea133437b8da34fcadf038ee437419a41d2",
+        "status": "REFUSE_UNMAPPED"
+      },
+      {
+        "case": 7,
+        "input_sha256": "16ca4782d7e0c374de3fb9d7a37ae57df9ac00f12e8d28fe4a5cd523a49554ca",
+        "output_sha256": "16ca4782d7e0c374de3fb9d7a37ae57df9ac00f12e8d28fe4a5cd523a49554ca",
+        "status": "REFUSE_UNMAPPED"
+      },
+      {
+        "case": 8,
+        "input_sha256": "df92b05581be036256bfcc66056429144f39783656797587b081d61de60848a2",
+        "output_sha256": "df92b05581be036256bfcc66056429144f39783656797587b081d61de60848a2",
+        "status": "REFUSE_UNMAPPED"
+      },
+      {
+        "case": 9,
+        "input_sha256": "a05a813d9683ca0a015c05c4e22581a1204a29249b64c9d8af021bed1985f77e",
+        "output_sha256": "a05a813d9683ca0a015c05c4e22581a1204a29249b64c9d8af021bed1985f77e",
+        "status": "REFUSE_INVALID"
+      },
+      {
+        "case": 10,
+        "input_sha256": "72ba4f878a5c2816ecc553adbccacdc895e5e136da06a90285fd9edd5c2ea0b7",
+        "output_sha256": "72ba4f878a5c2816ecc553adbccacdc895e5e136da06a90285fd9edd5c2ea0b7",
+        "status": "REFUSE_INVALID"
+      },
+      {
+        "case": 11,
+        "input_sha256": "151b3de41b424c4ca50c498ae7746a09311995bf1af8a21fe0587c41c1f47933",
+        "output_sha256": "151b3de41b424c4ca50c498ae7746a09311995bf1af8a21fe0587c41c1f47933",
+        "status": "REFUSE_UNMAPPED"
+      }
+    ],
+    "seed": 1337
+  },
+  "large_files": {
+    "cases": [
+      {
+        "elapsed_ms": 19277.015,
+        "matched_expectation": true,
+        "name": "near_limit",
+        "status": "ACCEPT_FIXED"
+      },
+      {
+        "elapsed_ms": 17.998,
+        "matched_expectation": true,
+        "name": "oversized",
+        "status": "REFUSE_INVALID"
+      }
+    ],
+    "failure_count": 0
+  },
+  "rapid_save_simulation": {
+    "failure_count": 0,
+    "iterations": 30,
+    "status_counts": {
+      "corrected": 30,
+      "other": 0
+    }
+  },
+  "summary": {
+    "all_engine_cases_completed": true,
+    "cli_batch_failures": 0,
+    "concurrency_identical": true,
+    "extension_build_ok": true,
+    "fuzz_exceptions": 0,
+    "large_file_failures": 0,
+    "rapid_save_failures": 0
+  }
+}

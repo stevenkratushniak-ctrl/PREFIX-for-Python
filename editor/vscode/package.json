@@ -1,0 +1,80 @@
+{
+  "name": "prefix-python",
+  "displayName": "PREFIX for Python",
+  "description": "Deterministic Python prefix layer for bounded correctness.",
+  "version": "0.1.0",
+  "publisher": "fastindustries",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:prefixPython.correctDocument",
+    "onCommand:prefixPython.correctSelection",
+    "onLanguage:python"
+  ],
+  "files": [
+    "LICENSE.txt",
+    "out/**",
+    "extension.ts",
+    "README.md",
+    "package.json"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "prefixPython.correctDocument",
+        "title": "PREFIX: Govern Active Python Transition"
+      },
+      {
+        "command": "prefixPython.correctSelection",
+        "title": "PREFIX: Govern Selected Python Structure"
+      },
+      {
+        "command": "prefixPython.showGovernanceSurface",
+        "title": "PREFIX: Show Last Transition Governance Surface"
+      }
+    ],
+    "configuration": {
+      "title": "PREFIX for Python",
+      "properties": {
+        "prefixPython.pythonCommand": {
+          "type": "string",
+          "default": "python",
+          "description": "Python executable used to invoke the local prefix-python engine."
+        },
+        "prefixPython.enableOnEnter": {
+          "type": "boolean",
+          "default": true,
+          "description": "When enabled, PREFIX evaluates mapped ALWAYS_SAFE Python prefix corrections after Enter inserts a newline."
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "python",
+        "extensions": [
+          ".py"
+        ],
+        "aliases": [
+          "Python"
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "build": "npx --no-install tsc -p .",
+    "package": "npx --no-install vsce package --allow-missing-repository",
+    "test:behavior": "node response.test.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.9.1",
+    "typescript": "^5.4.5"
+  }
+}

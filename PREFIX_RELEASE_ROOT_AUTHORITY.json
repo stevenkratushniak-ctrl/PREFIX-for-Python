@@ -1,0 +1,60 @@
+{
+  "backup_label": "ConstrainedPython_20260512_162244",
+  "canonical_release_bundle": {
+    "path": "C:\\PREFIX_PYTHON\\release\\prefix-python-0.1.0-rc2.zip",
+    "sha256": "7a92c318ce9be3f93ba97d319d2d1d1ebcba323205b4690c669e70485fb5d82d"
+  },
+  "demo_evidence": {
+    "artifact_count": 7,
+    "evaluation_license_id": "lic-302763ec0d47c21b",
+    "invite_id": "invite-294190abf1096bdb",
+    "team_id": "team-2de3300a279b238b",
+    "workspace": "C:\\PREFIX_PYTHON\\qualification\\_hardening_artifacts\\operator_console_demo"
+  },
+  "external_reference_scan": {
+    "match_count": 0,
+    "pattern_labels": [
+      "legacy_autofix_documents_root",
+      "legacy_autofix_product_root",
+      "legacy_user_profile_root"
+    ]
+  },
+  "old_root_reference_scan": {
+    "match_count": 0,
+    "pattern_labels": [
+      "legacy_parent_repo_root",
+      "legacy_product_source_root"
+    ]
+  },
+  "release_artifacts": {
+    "vsix": {
+      "path": "C:\\PREFIX_PYTHON\\release\\prefix-python-0.1.0.vsix",
+      "sha256": "02a332530f55ff785e7f41d5e8004245c21033e7ea27e54dc2df586db757e4bf"
+    },
+    "wheel": {
+      "path": "C:\\PREFIX_PYTHON\\release\\prefix_python-0.1.0-py3-none-any.whl",
+      "sha256": "feb085394d9a441d8202e546f2f9c55fd43c2aeaf735e5bb564c455636042b4a"
+    }
+  },
+  "schema_version": "1.0.0",
+  "source_root_label": "parent_source_root",
+  "standalone_dependency_status": "independent",
+  "standalone_root": "C:\\PREFIX_PYTHON",
+  "validation": {
+    "clean_venv_install_and_prefix_python_ops_help": "passed",
+    "deterministic_operator_demo": "passed",
+    "markdown_link_scan": "LINK_SCAN_CLEAN",
+    "npm_run_build": "passed",
+    "npm_run_package": "passed",
+    "npm_run_test_behavior": "passed",
+    "python_operator_console_help": "passed",
+    "python_unittest_discover": {
+      "failed": 0,
+      "passed": 55
+    },
+    "qualification_regeneration": "passed",
+    "release_zip_checksum_verification": "passed",
+    "release_zip_only_install_validation": "passed",
+    "wheel_build": "passed"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "authority_root": "C:\\PREFIX_PYTHON",
+  "candidate_identity": "prefix-python-0.1.0-rc2",
+  "distribution_state": "prepared_for_founding_operator_distribution",
+  "founding_operator_release_root": true,
+  "publish_state": "not_pushed_not_published",
+  "qualification_evidence": {
+    "adversarial_report": "C:\\PREFIX_PYTHON\\ADVERSARIAL_REPORT.json",
+    "determinism_report": "C:\\PREFIX_PYTHON\\DETERMINISM_REPORT.json",
+    "handoff": "C:\\PREFIX_PYTHON\\FINAL_FOUNDING_OPERATOR_HANDOFF.md",
+    "reproducibility_report": "C:\\PREFIX_PYTHON\\RELEASE_REPRODUCIBILITY_REPORT.md",
+    "root_authority": "C:\\PREFIX_PYTHON\\PREFIX_RELEASE_ROOT_AUTHORITY.json",
+    "root_report": "C:\\PREFIX_PYTHON\\PREFIX_STANDALONE_ROOT_REPORT.md",
+    "standalone_validation": "C:\\PREFIX_PYTHON\\PREFIX_STANDALONE_VALIDATION_REPORT.md",
+    "stress_report": "C:\\PREFIX_PYTHON\\STRESS_REPORT.json"
+  },
+  "release_artifacts": {
+    "bundle_directory": "C:\\PREFIX_PYTHON\\release\\prefix-python-0.1.0-rc2",
+    "bundle_manifest_sha256": "0bc2aeee84d392d376fa52424b697887bad1bc1affd5b3cda5baaba80db961bb",
+    "bundle_sha256sums_sha256": "20834482597a1b9af65b7cb082e9573d32cbb41c4a532d3d751a404ea676c220",
+    "bundle_zip": "C:\\PREFIX_PYTHON\\release\\prefix-python-0.1.0-rc2.zip",
+    "bundle_zip_sha256": "7a92c318ce9be3f93ba97d319d2d1d1ebcba323205b4690c669e70485fb5d82d",
+    "vsix": "C:\\PREFIX_PYTHON\\release\\prefix-python-0.1.0.vsix",
+    "vsix_sha256": "02a332530f55ff785e7f41d5e8004245c21033e7ea27e54dc2df586db757e4bf",
+    "wheel": "C:\\PREFIX_PYTHON\\release\\prefix_python-0.1.0-py3-none-any.whl",
+    "wheel_sha256": "feb085394d9a441d8202e546f2f9c55fd43c2aeaf735e5bb564c455636042b4a"
+  },
+  "validation_date_local": "2026-05-12",
+  "validation_summary": {
+    "clean_venv_install": "passed",
+    "deterministic_operator_demo": "passed",
+    "forbidden_bundle_scan": "passed",
+    "markdown_link_scan": "passed",
+    "old_root_leakage_scan": "passed",
+    "operator_console_help": "passed",
+    "prefix_python_ops_help": "passed",
+    "release_qualification": "passed",
+    "release_zip_checksum_verification": "passed",
+    "reproducibility_comparison": "passed",
+    "tests": {
+      "failed": 0,
+      "passed": 55
+    },
+    "vs_code_behavior_tests": "passed",
+    "vs_code_build": "passed",
+    "vs_code_package": "passed",
+    "wheel_build": "passed"
+  },
+  "validation_timezone": "America/Los_Angeles"
+}

@@ -1,0 +1,200 @@
+PYTHON 3.12 AST NODE REGISTRY (FINITE)
+
+Source:
+- Python 3.12 official AST (ast module)
+- Grammar: PEG
+
+NOTE:
+This is the complete, finite set of AST node types.
+All valid Python programs are compositions of these nodes.
+Invalid programs attempt illegal compositions or transitions.
+
+====================================================
+MODULE LEVEL
+====================================================
+
+Module
+Interactive
+Expression
+
+====================================================
+STATEMENTS
+====================================================
+
+FunctionDef
+AsyncFunctionDef
+ClassDef
+Return
+Delete
+Assign
+AugAssign
+AnnAssign
+For
+AsyncFor
+While
+If
+With
+AsyncWith
+Raise
+Try
+Assert
+Import
+ImportFrom
+Global
+Nonlocal
+Expr
+Pass
+Break
+Continue
+Match
+
+====================================================
+EXPRESSIONS
+====================================================
+
+BoolOp
+NamedExpr
+BinOp
+UnaryOp
+Lambda
+IfExp
+Dict
+Set
+ListComp
+SetComp
+DictComp
+GeneratorExp
+Await
+Yield
+YieldFrom
+Compare
+Call
+FormattedValue
+JoinedStr
+Constant
+Attribute
+Subscript
+Starred
+Name
+List
+Tuple
+Slice
+
+====================================================
+PATTERN MATCHING (Python 3.10+)
+====================================================
+
+MatchValue
+MatchSingleton
+MatchSequence
+MatchMapping
+MatchClass
+MatchStar
+MatchAs
+MatchOr
+
+====================================================
+OPERATORS (FINITE)
+====================================================
+
+Add
+Sub
+Mult
+MatMult
+Div
+Mod
+Pow
+LShift
+RShift
+BitOr
+BitXor
+BitAnd
+FloorDiv
+
+====================================================
+BOOLEAN OPERATORS
+====================================================
+
+And
+Or
+
+====================================================
+COMPARISON OPERATORS
+====================================================
+
+Eq
+NotEq
+Lt
+LtE
+Gt
+GtE
+Is
+IsNot
+In
+NotIn
+
+====================================================
+UNARY OPERATORS
+====================================================
+
+Invert
+Not
+UAdd
+USub
+
+====================================================
+CONTEXTS
+====================================================
+
+Load
+Store
+Del
+
+====================================================
+COMPREHENSION SUPPORT
+====================================================
+
+comprehension
+
+====================================================
+EXCEPTIONS / HANDLERS
+====================================================
+
+ExceptHandler
+
+====================================================
+WITH ITEMS
+====================================================
+
+withitem
+
+====================================================
+ARGUMENTS / PARAMETERS
+====================================================
+
+arguments
+arg
+keyword
+
+====================================================
+ALIASES / IMPORTS
+====================================================
+
+alias
+
+====================================================
+COMMENTS / TYPE IGNORE
+====================================================
+
+TypeIgnore
+
+====================================================
+GLOBAL RULE
+====================================================
+
+All Python programs at version 3.12 are finite compositions
+of the above node types under grammar-enforced constraints.
+
+No other node types exist.
+Any attempt to express structure outside this registry
+is invalid and must be rejected or transformed.
