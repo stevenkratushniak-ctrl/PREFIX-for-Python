@@ -20,7 +20,7 @@ This release preserves deterministic correction, finite grammar theory, refusal 
 
 ## Python Lane Model
 
-`PREFIX for Python` now classifies Python rules into four product lanes:
+`PREFIX for Python` classifies Python rules into four product lanes:
 
 - `APPLY`: singular lawful Python continuations that are `ALWAYS_SAFE`, line-local, idempotent, and parse/reparse validated
 - `ADVISE`: ranked Python continuations that are real and bounded, but never auto-applied
@@ -53,8 +53,8 @@ It is a deterministic Python prefix layer:
 - A local Python engine that accepts valid Python, applies bounded deterministic repairs, advises ranked continuations, analyzes bounded non-apply cases, or refuses the transition
 - A CLI for file, stdin, receipt inspection, rollback, and deterministic replay workflows
 - A VS Code extension that can prefix-correct mapped Python block-structure states on Enter and through explicit commands while exposing legality and proof data locally
-- Controlled Operator Release support materials for 30-day evaluation, conversion readiness, and release distribution reporting
-- Launch assets for GitHub, Product Hunt, release packaging, pricing, screenshots, and landing-page deployment
+- Windows x64 and Linux amd64 installers that install the exact engine and VS Code extension together
+- Release manifests, SHA-256 checksums, demos, qualification tooling, and source-to-package parity evidence
 
 ## Supported Deterministic Corrections
 
@@ -76,66 +76,66 @@ Advice and analysis stay separate from apply. Example:
 
 ## Python Compatibility
 
-PREFIX Python rc2 is pinned to CPython `3.12.x`.
+PREFIX for Python 0.1.0 is pinned to CPython `3.12.x`.
 
-Validated runtime: CPython `3.12.6`.
+The Windows x64 package includes CPython `3.12.10`. The Linux amd64 package detects an installed CPython `3.12` runtime and blocks with a clear instruction if it is absent.
 
 The package metadata requires `>=3.12,<3.13`, and the runtime intentionally refuses execution outside the Python 3.12 AST authority surface. Python `3.11`, `3.13`, and `3.14` are not public compatibility targets for this release. Python `3.13` and `3.14` require separate AST authority catalogs before support can be claimed.
 
-## Quick Start
+## Install and Start
 
-From the product root:
+Download the package for your platform from the 0.1.0 release and extract it.
 
-Use a CPython `3.12.x` interpreter for every install and launch command below.
+On Windows x64, double-click:
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install .
+```text
+Install-PREFIX-for-Python.cmd
 ```
+
+The Windows installer verifies every payload hash, installs its bundled CPython 3.12 runtime and exact wheel per user, installs the shipped VSIX, connects the extension to that runtime automatically, and runs a correction smoke check. It does not require `python` or `pip` on `PATH`.
+
+On Linux amd64, run from the extracted package directory:
+
+```sh
+./install-prefix-python.sh
+prefix-python-demo
+```
+
+The Linux installer verifies every payload hash, uses a detected CPython 3.12 runtime, installs the exact wheel without a network dependency step, and installs the shipped VSIX automatically when the `code` command is present. If CPython 3.12 or VS Code is absent, it prints the exact missing prerequisite and leaves unrelated user files unchanged.
+
+After installation, open a Python file in VS Code and run `PREFIX: Govern Active Python Transition`, or use `prefix-python` from a terminal. On Linux, ensure `~/.local/bin` is on `PATH` if your distribution does not add it automatically.
+
+Uninstall with `Uninstall-PREFIX-for-Python.cmd` on Windows or `./uninstall-prefix-python.sh` on Linux.
+
+## CLI Examples
 
 Analyze a file:
 
-```powershell
-prefix-python examples\broken_missing_colon.txt --json
+```text
+prefix-python broken_missing_colon.txt --json
 ```
 
 Write the correction back to disk:
 
-```powershell
-prefix-python examples\broken_missing_colon.txt --apply
+```text
+prefix-python broken_missing_colon.txt --apply
 ```
 
 Inspect a receipt:
 
-```powershell
+```text
 prefix-python --inspect-receipt .prefix-python-receipts\<receipt>.json --json
 ```
 
 Replay a prior accepted correction without mutating any file:
 
-```powershell
+```text
 prefix-python --replay-receipt .prefix-python-receipts\<receipt>.json --json
 ```
 
-Correct from stdin:
+Receipt-backed `--apply`, `--inspect-receipt`, `--replay-receipt`, and `--rollback` operations remain local and deterministic. PREFIX refuses symbolic-link writes and unsupported or ambiguous repairs instead of guessing.
 
-```powershell
-Get-Content examples\broken_missing_colon.txt -Raw | prefix-python --stdin --json
-```
-
-Run the demo:
-
-```powershell
-python demo\demo_script.py
-```
-
-Run tests:
-
-```powershell
-python -m unittest discover -s tests -q
-```
+For source verification, use CPython 3.12 and run `python -m unittest discover -s tests -q` from the repository root.
 
 ## VS Code Extension
 
@@ -143,8 +143,9 @@ The extension package lives in `editor/vscode/package.json`.
 
 It provides:
 
-- `PREFIX: Correct Active Python Document`
-- `PREFIX: Correct Selected Python Text`
+- `PREFIX: Govern Active Python Transition`
+- `PREFIX: Govern Selected Python Structure`
+- `PREFIX: Show Last Transition Governance Surface`
 - Enter-triggered correction for mapped `ALWAYS_SAFE` Python block-structure states
 - local advised recommendations when ranked Python continuations exist
 
@@ -156,21 +157,9 @@ PREFIX either applies the singular lawful structural correction or refuses local
 
 The extension shells out only to the local Python engine. No cloud inference is required.
 
-## Controlled Operator Release
+## Release 0.1.0
 
-`PREFIX for Python` rc2 is available through a Controlled Operator Release for selected engineering teams.
-
-Release access is structured as:
-
-- selected operators and engineering teams
-- 30-day evaluation
-- proof-driven onboarding
-- CPython `3.12.x` only
-- conversion to a paid license after evaluation
-
-This release is positioned as controlled infrastructure evaluation for selected engineering teams.
-
-Apply for Private Operator Release access.
+Release 0.1.0 provides separate Windows x64 and Linux amd64 packages, the standalone wheel and VSIX, a combined release bundle, SHA-256 checksums, release notes, and an offline release verifier. The supported claim is limited to the exact packages and qualification evidence published with that release.
 
 ## Example
 
@@ -237,22 +226,9 @@ PREFIX_PYTHON/
 └── docs/                   # Theory and supporting documents
 ```
 
-## Commercial Package
+## Release Artifacts
 
-Launch materials are ready in:
-
-- `launch/PRODUCT_HUNT.md`
-- `launch/LAUNCH_COPY.md`
-- `launch/LANDING_PAGE_COPY.md`
-- `launch/PRICING.md`
-- `launch/SCREENSHOTS.md`
-- `launch/GITHUB_RELEASE.md`
-- `launch/DEMO_FLOW.md`
-- `launch/DEPLOYMENT.md`
-
-Release assets are prepared in `release/`.
-
-Controlled release materials cover selected-team evaluation, proof-driven onboarding, conversion readiness, and paid-license transition after the 30-day evaluation.
+Final release assets are built into `release/prefix-python-0.1.0-final/`, with the combined Windows and Linux bundle at `release/prefix-python-0.1.0-windows-linux.zip`. `RELEASE_MANIFEST.json`, `SHA256SUMS.txt`, and `VERIFY_RELEASE.py` bind and verify the exact files.
 
 ## Operational Posture
 

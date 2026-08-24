@@ -1,78 +1,50 @@
-# FINAL RELEASE NOTES
+# PREFIX for Python 0.1.0
 
-## Product
+PREFIX for Python is a deterministic Python prefix layer for bounded structural correction. It applies only mapped `ALWAYS_SAFE` repairs, presents non-mutating advice when a singular repair is unavailable, and refuses unsupported or unsafe transitions.
 
-`PREFIX for Python`
+## Release assets
 
-Deterministic Python prefix layer for bounded correctness.
+- `prefix-python-0.1.0-windows-x64.zip` — per-user Windows x64 installer with bundled CPython 3.12.10, exact wheel, VSIX, payload manifest, demo inputs, and uninstall command
+- `prefix-python-0.1.0-linux-amd64.tar.gz` — per-user Linux amd64 installer for a detected CPython 3.12 runtime, with exact wheel, VSIX, payload manifest, demo inputs, and uninstall command
+- `prefix_python-0.1.0-py3-none-any.whl` — standalone Python package
+- `prefix-python-0.1.0.vsix` — standalone VS Code extension
+- `prefix-python-0.1.0-windows-linux.zip` — combined release bundle
+- `RELEASE_MANIFEST.json`, `SHA256SUMS.txt`, and `VERIFY_RELEASE.py` — source identity, artifact hashes, parity evidence, and offline verification
 
-## Release Surface
+## Normal installation
 
-This release is authorized from the frozen canonical bundle only:
+Extract the platform package. On Windows, run `Install-PREFIX-for-Python.cmd`. On Linux, run `./install-prefix-python.sh` and then `prefix-python-demo`.
 
-- `release/prefix-python-0.1.0-rc2.zip`
+Both installers verify their payload hashes, install the exact wheel without an unconditional network dependency step, install the shipped VSIX automatically, connect the extension to the installed engine, and run a real correction smoke check. Installation does not modify user source files.
 
-Identity rule:
+## Product behavior
 
-- Python package and CLI version: `0.1.0`
-- Release bundle revision: `0.1.0-rc2`
-- `rc2` identifies the controlled release bundle revision, not a different Python package version.
+- Typed outcomes: `ACCEPT_VALID`, `ACCEPT_FIXED`, `REFUSE_UNMAPPED`, `REFUSE_AMBIGUOUS`, and `REFUSE_INVALID`
+- Parse/reparse validation for every accepted mutation
+- Advice and analysis without buffer mutation
+- Receipt generation, inspection, deterministic replay, and rollback
+- Symbolic-link write refusal
+- VS Code document, selection, Enter, governance-surface, missing-engine, wrong-engine, and timeout behavior
+- Automatic installed-runtime discovery on Windows and Linux
 
-Authoritative verification files:
+## Supported platforms
 
-- `release/prefix-python-0.1.0-rc2/RELEASE_VERIFICATION_MANIFEST.json`
-- `release/prefix-python-0.1.0-rc2/SHA256SUMS.txt`
+- Windows x64: packaged, fresh-installed, engine-qualified, and proven in two real VS Code extension-host launches
+- Linux amd64: packaged, fresh-installed, engine-qualified, and proven in two real VS Code extension-host launches on a hosted Ubuntu 24.04 x86_64 runner
+- Linux-on-WSL evidence is retained separately and is not described as native or genuine Linux proof
+- CPython compatibility is intentionally limited to `>=3.12,<3.13`
+- Windows arm64, Linux arm64, macOS, and Python 3.11, 3.13, and 3.14 are not qualified for this release
 
-## Release Outcome
+## Verification result
 
-- Typed outcomes:
-  - `ACCEPT_VALID`
-  - `ACCEPT_FIXED`
-  - `REFUSE_UNMAPPED`
-  - `REFUSE_AMBIGUOUS`
-  - `REFUSE_INVALID`
-- Parse/reparse validation is mandatory for accepted states.
-- Invalid AST states are not committed.
-- Ambiguity is refused.
-- Receipts support rollback, inspection, and deterministic replay.
-- The VS Code extension supports Enter-triggered prefix correction for mapped `ALWAYS_SAFE` Python block-structure states.
+- Python unit suite: 56 tests passed; one Windows-only symlink-capability skip is allowed where the host cannot create a test link
+- Portable engine qualification: 14 checks passed on Windows x64 and genuine Linux amd64
+- Receipt apply, inspect, replay, rollback, determinism, refusal, and no-unintended-mutation checks passed
+- VS Code extension compilation, behavior tests, deterministic packaging, and offline npm audit passed; audit result: 0 vulnerabilities
+- Real VS Code host suite passed twice on Windows x64 and twice on genuine Linux amd64, including Enter, refusal, wrong/missing engine, five-second timeout, and restart
+- Installer and uninstaller fresh-profile verification passed on both platforms
+- Wheel and VSIX source-to-package parity passed
 
-## Validation Snapshot
+## Boundary
 
-- Python unit suite: `55/55` passed
-- Python compile sweep: passed
-- VS Code extension build: passed
-- VS Code behavior test: passed
-- VS Code package build: passed
-- release qualification: passed
-- release ZIP checksum verification: passed
-- release ZIP-only install validation: passed
-- targeted secret scan: clean
-- targeted purity scan: clean
-- link scan: clean
-
-## Compatibility Lock
-
-- Requires CPython `3.12.x`
-- Validated on CPython `3.12.6`
-- Package metadata remains `>=3.12,<3.13`
-- Python `3.13` and `3.14` require separate AST authority catalogs and are not claimed in rc2
-- Python `3.11`, `3.13`, and `3.14` remain outside the supported release boundary
-
-## Canonical Bundle Hash
-
-- zip sha256: `7a92c318ce9be3f93ba97d319d2d1d1ebcba323205b4690c669e70485fb5d82d`
-- bundle manifest sha256: `0bc2aeee84d392d376fa52424b697887bad1bc1affd5b3cda5baaba80db961bb`
-- bundle SHA256SUMS sha256: `20834482597a1b9af65b7cb082e9573d32cbb41c4a532d3d751a404ea676c220`
-- standalone wheel sha256: `feb085394d9a441d8202e546f2f9c55fd43c2aeaf735e5bb564c455636042b4a`
-- standalone VSIX sha256: `02a332530f55ff785e7f41d5e8004245c21033e7ea27e54dc2df586db757e4bf`
-- canonicalized bundle wheel sha256: `ade524310084b6b8c6532ff48efa0524f0c7456293b6ecc6233606ab8d2d697e`
-- canonicalized bundle VSIX sha256: `e76ab64f9ffc60ca356a57065fa95079cb1aa7a1defe9e6f40efa7ee93a1edd2`
-
-## Final Launch Decision
-
-Bounded public launch approved from the frozen canonical bundle.
-
-## Remaining Caveat
-
-Full interactive VS Code extension-host GUI testing is still outside the automated evidence set.
+PREFIX for Python is not a semantic code generator, general debugger, cloud inference service, or promise that arbitrary invalid Python can be repaired. It changes source only under its declared deterministic structural rules and refuses beyond that surface.

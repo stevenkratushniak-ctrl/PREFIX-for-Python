@@ -13,8 +13,9 @@ The extension now reflects the Python lane model directly:
 
 ## Commands
 
-- `PREFIX: Correct Active Python Document`
-- `PREFIX: Correct Selected Python Text`
+- `PREFIX: Govern Active Python Transition`
+- `PREFIX: Govern Selected Python Structure`
+- `PREFIX: Show Last Transition Governance Surface`
 
 ## Enter-Triggered Flow
 
@@ -43,7 +44,7 @@ If PREFIX inserts `pass` to keep the document parse-valid on Enter, the inserted
 - CPython 3.12.x
 - `prefix-python` installed locally
 
-Validated runtime: CPython 3.12.6.
+Validated release runtimes include bundled CPython 3.12.10 on Windows and CPython 3.12.3 on hosted Ubuntu Linux.
 
 The current release is intentionally pinned to the Python 3.12 AST authority surface. Python 3.11, 3.13, and 3.14 are not public compatibility targets for this release. Python 3.13 and 3.14 require separate AST authority catalogs before support can be claimed.
 
@@ -53,16 +54,16 @@ The Windows and Linux PREFIX installers install this extension and connect it to
 
 For source development only:
 
-```powershell
-cd editor\vscode
-npm install
+```text
+cd editor/vscode
+npm ci
 npm run build
 ```
 
-From the product root, make sure the engine is installed:
+Run the extension against a PREFIX for Python 0.1.0 installation, or install the source into an isolated CPython 3.12 development environment:
 
-```powershell
-python -m pip install .
+```text
+python3.12 -m pip install .
 ```
 
 ## Configuration
