@@ -1,0 +1,185 @@
+name: Linux amd64 product proof
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Draft release tag containing the exact Linux package
+        required: true
+        type: string
+      expected_sha256:
+        description: Expected SHA-256 of prefix-python-0.1.0-linux-amd64.tar.gz
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prefix-linux-amd64-proof
+  cancel-in-progress: false
+
+jobs:
+  prove-linux-amd64:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      PACKAGE_NAME: prefix-python-0.1.0-linux-amd64.tar.gz
+      PROOF_ROOT: ${{ github.workspace }}/qualification/_work/genuine-linux-amd64
+
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@v4
+
+      - name: Establish genuine Linux runner identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -s)" = Linux
+          test "$(uname -m)" = x86_64
+          if grep -Eiq 'microsoft|wsl' /proc/version; then
+            echo 'WSL is not admissible for this proof.' >&2
+            exit 1
+          fi
+          mkdir -p "$PROOF_ROOT"
+          python3 - <<'PY'
+          import json, os, pathlib, platform
+          payload = {
+              "github_repository": os.environ["GITHUB_REPOSITORY"],
+              "github_run_id": os.environ["GITHUB_RUN_ID"],
+              "github_sha": os.environ["GITHUB_SHA"],
+              "machine": platform.machine(),
+              "platform": platform.platform(),
+              "processor": platform.processor(),
+              "release": platform.release(),
+              "system": platform.system(),
+          }
+          pathlib.Path(os.environ["PROOF_ROOT"], "runner-identity.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+          )
+          PY
+          cat "$PROOF_ROOT/runner-identity.json"
+
+      - name: Install headless VS Code prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            dbus-x11 xvfb libasound2t64 libatk-bridge2.0-0 libatspi2.0-0 \
+            libdrm2 libgbm1 libgtk-3-0 libnss3 libx11-xcb1 libxdamage1 \
+            libxkbcommon0 libxrandr2 libxss1
+
+      - name: Download and verify the exact Linux package
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/prefix-package"
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+            --pattern "$PACKAGE_NAME" --dir "$RUNNER_TEMP/prefix-package"
+          printf '%s  %s\n' "$EXPECTED_SHA256" "$RUNNER_TEMP/prefix-package/$PACKAGE_NAME" \
+            | sha256sum --check --strict
+          printf '%s  %s\n' "$EXPECTED_SHA256" "$PACKAGE_NAME" > "$PROOF_ROOT/package-sha256.txt"
+          tar -tzf "$RUNNER_TEMP/prefix-package/$PACKAGE_NAME" > "$PROOF_ROOT/package-contents.txt"
+          tar -xzf "$RUNNER_TEMP/prefix-package/$PACKAGE_NAME" -C "$RUNNER_TEMP/prefix-package"
+
+      - name: Install pinned VS Code host
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/vscode" "$RUNNER_TEMP/bin"
+          curl --fail --location --retry 3 \
+            https://update.code.visualstudio.com/1.85.2/linux-x64/stable \
+            --output "$RUNNER_TEMP/vscode.tar.gz"
+          tar -xzf "$RUNNER_TEMP/vscode.tar.gz" -C "$RUNNER_TEMP/vscode"
+          ln -s "$RUNNER_TEMP/vscode/VSCode-linux-x64/bin/code" "$RUNNER_TEMP/bin/code"
+          "$RUNNER_TEMP/bin/code" --version | tee "$PROOF_ROOT/vscode-version.txt"
+
+      - name: Clean install actual package and verify engine and VSIX
+        shell: bash
+        env:
+          HOME: ${{ runner.temp }}/prefix-home
+          XDG_DATA_HOME: ${{ runner.temp }}/prefix-home/.local/share
+          PREFIX_BIN_ROOT: ${{ runner.temp }}/prefix-home/.local/bin
+          PREFIX_VSCODE_USER_DATA_DIR: ${{ runner.temp }}/prefix-home/vscode-user
+          PREFIX_VSCODE_EXTENSIONS_DIR: ${{ runner.temp }}/prefix-home/vscode-extensions
+        run: |
+          set -euo pipefail
+          export PATH="$RUNNER_TEMP/bin:$PREFIX_BIN_ROOT:$PATH"
+          test "$(python3.12 -c 'import platform,sys; print(platform.python_implementation(), *sys.version_info[:2])')" = 'CPython 3 12'
+          package_root="$RUNNER_TEMP/prefix-package/prefix-python-0.1.0-linux-amd64"
+          test "$(stat -c %a "$package_root/install-prefix-python.sh")" = 755
+          "$package_root/install-prefix-python.sh" | tee "$PROOF_ROOT/install-output.txt"
+          install_root="$XDG_DATA_HOME/fastindustries/prefix-python"
+          cp "$install_root/install-manifest.json" "$PROOF_ROOT/install-manifest.json"
+          "$PREFIX_BIN_ROOT/prefix-python" --version | tee "$PROOF_ROOT/engine-version.txt"
+          "$PREFIX_BIN_ROOT/prefix-python-demo" | tee "$PROOF_ROOT/demo.json"
+          code --list-extensions \
+            --extensions-dir "$PREFIX_VSCODE_EXTENSIONS_DIR" \
+            --user-data-dir "$PREFIX_VSCODE_USER_DATA_DIR" \
+            | tee "$PROOF_ROOT/extensions.txt"
+          grep -Fx fastindustries.prefix-python "$PROOF_ROOT/extensions.txt"
+          "$install_root/runtime/prefix-python-python" \
+            qualification/run_release_qualification.py \
+            --python "$install_root/runtime/prefix-python-python" \
+            --skip-extension \
+            --output "$PROOF_ROOT/engine-qualification.json"
+
+      - name: Prove the real VS Code extension host twice
+        shell: bash
+        env:
+          HOME: ${{ runner.temp }}/prefix-home
+          XDG_DATA_HOME: ${{ runner.temp }}/prefix-home/.local/share
+          PREFIX_BIN_ROOT: ${{ runner.temp }}/prefix-home/.local/bin
+          PREFIX_VSCODE_USER_DATA_DIR: ${{ runner.temp }}/prefix-home/vscode-user
+          PREFIX_VSCODE_EXTENSIONS_DIR: ${{ runner.temp }}/prefix-home/vscode-extensions
+        run: |
+          set -euo pipefail
+          export PATH="$RUNNER_TEMP/bin:$PREFIX_BIN_ROOT:$PATH"
+          python3.12 qualification/run_vscode_host_proof.py \
+            --code "$RUNNER_TEMP/vscode/VSCode-linux-x64/bin/code" \
+            --user-data-dir "$PREFIX_VSCODE_USER_DATA_DIR" \
+            --extensions-dir "$PREFIX_VSCODE_EXTENSIONS_DIR" \
+            --timeout-engine "$(command -v python3.12)" \
+            --wrong-engine /bin/echo \
+            --xvfb-run /usr/bin/xvfb-run \
+            --dbus-run-session /usr/bin/dbus-run-session \
+            --output "$PROOF_ROOT/vscode-host-proof.json"
+
+      - name: Verify uninstall
+        if: success()
+        shell: bash
+        env:
+          HOME: ${{ runner.temp }}/prefix-home
+          XDG_DATA_HOME: ${{ runner.temp }}/prefix-home/.local/share
+          PREFIX_BIN_ROOT: ${{ runner.temp }}/prefix-home/.local/bin
+          PREFIX_VSCODE_USER_DATA_DIR: ${{ runner.temp }}/prefix-home/vscode-user
+          PREFIX_VSCODE_EXTENSIONS_DIR: ${{ runner.temp }}/prefix-home/vscode-extensions
+        run: |
+          set -euo pipefail
+          export PATH="$RUNNER_TEMP/bin:$PREFIX_BIN_ROOT:$PATH"
+          package_root="$RUNNER_TEMP/prefix-package/prefix-python-0.1.0-linux-amd64"
+          "$package_root/uninstall-prefix-python.sh" | tee "$PROOF_ROOT/uninstall-output.txt"
+          test ! -e "$XDG_DATA_HOME/fastindustries/prefix-python"
+          test ! -e "$PREFIX_BIN_ROOT/prefix-python"
+          if code --list-extensions \
+            --extensions-dir "$PREFIX_VSCODE_EXTENSIONS_DIR" \
+            --user-data-dir "$PREFIX_VSCODE_USER_DATA_DIR" \
+            | grep -Fx fastindustries.prefix-python; then
+            echo 'PREFIX extension remained registered after uninstall.' >&2
+            exit 1
+          fi
+          printf '%s\n' 'UNINSTALL_OK' > "$PROOF_ROOT/uninstall-status.txt"
+
+      - name: Preserve proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prefix-linux-amd64-proof-${{ github.run_id }}
+          path: qualification/_work/genuine-linux-amd64/
+          if-no-files-found: error
+          retention-days: 90
