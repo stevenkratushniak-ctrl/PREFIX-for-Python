@@ -55,6 +55,12 @@ const ENTER_ALLOWED_RULES = new Set([
     "NORMALIZE_TABS",
 ]);
 
+export function deriveEnterCursorLine(changeStartLine: number, insertedText: string, fallbackLine: number): number {
+    const normalized = normalizeNewlines(insertedText);
+    const insertedLineCount = normalized.split("\n").length - 1;
+    return insertedLineCount > 0 ? changeStartLine + insertedLineCount : fallbackLine;
+}
+
 export function buildEnterCorrectionPlan(input: EnterCorrectionInput): EnterCorrectionPlan | null {
     if (input.languageId !== "python") {
         return null;

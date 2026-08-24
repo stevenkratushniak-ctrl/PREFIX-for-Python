@@ -151,6 +151,23 @@ class PrefixPythonCliTests(unittest.TestCase):
             payload = json.loads(completed.stdout)
             self.assertEqual(payload["refusal_code"], "path_missing")
 
+    def test_apply_refuses_symbolic_link_without_mutating_target(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            target = Path(temp_dir) / "target.py"
+            link = Path(temp_dir) / "link.py"
+            original = "if ready\nprint('launch')\n"
+            target.write_text(original, encoding="utf-8")
+            try:
+                link.symlink_to(target)
+            except OSError as exc:
+                self.skipTest(f"symbolic-link creation is unavailable: {exc}")
+            completed = self._run(str(link), "--apply", "--json")
+            self.assertEqual(completed.returncode, 2, completed.stderr)
+            payload = json.loads(completed.stdout)
+            self.assertEqual(payload["refusal_code"], "write_symlink_refused")
+            self.assertFalse(payload["mutation_performed"])
+            self.assertEqual(target.read_text(encoding="utf-8"), original)
+
 
 if __name__ == "__main__":
     unittest.main()

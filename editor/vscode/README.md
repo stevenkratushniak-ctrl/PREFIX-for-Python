@@ -1,6 +1,6 @@
 # PREFIX for Python VS Code Extension
 
-`PREFIX for Python` applies deterministic Python prefix correction inside VS Code.
+`PREFIX for Python` applies deterministic Python prefix correction inside VS Code on Windows x64 and Linux amd64.
 
 It does not autocomplete. It does not infer intent from the cloud. It sends Python text to the local `prefix-python` engine, applies a mapped `ALWAYS_SAFE` correction when one lawful continuation exists, and refuses when the state is ambiguous or unsupported.
 
@@ -49,6 +49,10 @@ The current release is intentionally pinned to the Python 3.12 AST authority sur
 
 ## Local Setup
 
+The Windows and Linux PREFIX installers install this extension and connect it to the bundled engine automatically. No interpreter setting is required after a normal installation.
+
+For source development only:
+
 ```powershell
 cd editor\vscode
 npm install
@@ -65,8 +69,8 @@ python -m pip install .
 
 `prefixPython.pythonCommand`
 
-- Default: `python`
-- Set this to a CPython `3.12.x` interpreter path when your default `python` is not CPython `3.12.x`
+- Default: blank (automatic PREFIX runtime discovery)
+- Set an explicit CPython `3.12.x` path only to override the installed PREFIX engine
 
 ## Operational Behavior
 

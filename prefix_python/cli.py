@@ -65,8 +65,11 @@ def main(argv: list[str] | None = None) -> int:
         if args.stdin:
             source = sys.stdin.read()
             source_path: Path | None = None
+            source_path_was_symlink = False
         else:
-            source_path = Path(args.path).resolve()
+            source_argument = Path(args.path)
+            source_path_was_symlink = source_argument.is_symlink()
+            source_path = source_argument.resolve()
             if not source_path.exists():
                 return _emit_cli_refusal(
                     args.json,
@@ -102,7 +105,7 @@ def main(argv: list[str] | None = None) -> int:
     if apply_requested and source_path is None:
         parser.error("--apply requires a file path.")
 
-    if apply_requested and source_path is not None and source_path.is_symlink():
+    if apply_requested and source_path is not None and source_path_was_symlink:
         return _emit_cli_refusal(
             args.json,
             refusal_reason=f"PREFIX refuses `--apply` on symbolic links: `{source_path}`.",

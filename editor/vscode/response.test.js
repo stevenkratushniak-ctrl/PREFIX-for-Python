@@ -1,5 +1,8 @@
 const assert = require("node:assert/strict");
-const { buildEnterCorrectionPlan, shouldApplyEnterMutation } = require("./out/enter.js");
+const { buildEnterCorrectionPlan, deriveEnterCursorLine, shouldApplyEnterMutation } = require("./out/enter.js");
+const { installedRuntimeCandidates, resolvePythonInvocation } = require("./out/runtime.js");
+assert.equal(deriveEnterCursorLine(4, "\r\n    ", 4), 5);
+assert.equal(deriveEnterCursorLine(4, "x", 7), 7);
 const {
     buildOutcomeMessage,
     buildWhySurface,
@@ -284,6 +287,23 @@ assert.equal(
         enterPlan,
     ),
     true,
+);
+
+const windowsInstalled = installedRuntimeCandidates("win32", { LOCALAPPDATA: "C:\\Users\\operator\\AppData\\Local" });
+assert.deepEqual(windowsInstalled, ["C:\\Users\\operator\\AppData\\Local\\FastIndustries\\PREFIX for Python\\runtime\\python.exe"]);
+const linuxInstalled = installedRuntimeCandidates("linux", { HOME: "/home/operator" });
+assert.deepEqual(linuxInstalled, ["/home/operator/.local/share/fastindustries/prefix-python/runtime/prefix-python-python"]);
+assert.deepEqual(
+    resolvePythonInvocation("", "win32", { LOCALAPPDATA: "C:\\Users\\operator\\AppData\\Local" }, () => true),
+    { command: windowsInstalled[0], prefixArgs: [], source: "installed" },
+);
+assert.deepEqual(
+    resolvePythonInvocation("C:\\Python312\\python.exe", "win32", {}, () => false),
+    { command: "C:\\Python312\\python.exe", prefixArgs: [], source: "configured" },
+);
+assert.deepEqual(
+    resolvePythonInvocation("", "linux", { HOME: "/home/operator" }, () => false),
+    { command: "python3.12", prefixArgs: [], source: "system" },
 );
 
 assert.equal(

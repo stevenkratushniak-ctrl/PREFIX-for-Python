@@ -1,0 +1,13 @@
+{
+  "name": "prefix-python-host-qualification",
+  "displayName": "PREFIX Host Qualification",
+  "version": "0.0.1",
+  "publisher": "fastindustries-qualification",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./extension.js"
+}

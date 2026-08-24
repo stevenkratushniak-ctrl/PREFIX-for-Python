@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { spawn } from "node:child_process";
-import { buildEnterCorrectionPlan, EnterCorrectionPlan, shouldApplyEnterMutation } from "./enter";
+import { buildEnterCorrectionPlan, deriveEnterCursorLine, EnterCorrectionPlan, shouldApplyEnterMutation } from "./enter";
+import { formatInvocation, PythonInvocation, resolvePythonInvocation } from "./runtime";
 import {
     buildWhySurface,
     buildOutcomeMessage,
@@ -9,10 +10,29 @@ import {
     shouldApplyMutation,
 } from "./response";
 
+export type PrefixExtensionApi = {
+    getLastEngineError(): string | null;
+    getLastGovernanceSurface(): string[] | null;
+    getLastOutcome(): EngineResponse | null;
+    getResolvedInvocation(): PythonInvocation;
+};
+
+const extensionState: {
+    lastEngineError: string | null;
+    lastGovernanceSurface: string[] | null;
+    lastOutcome: EngineResponse | null;
+} = {
+    lastEngineError: null,
+    lastGovernanceSurface: null,
+    lastOutcome: null,
+};
+
 export function activate(context: vscode.ExtensionContext) {
     const output = vscode.window.createOutputChannel("PREFIX for Python");
     const inFlightDocuments = new Set<string>();
-    let lastGovernanceSurface: string[] | null = null;
+    extensionState.lastEngineError = null;
+    extensionState.lastGovernanceSurface = null;
+    extensionState.lastOutcome = null;
     const statusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
     setStatus(statusItem, "ready");
     statusItem.show();
@@ -24,7 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
 
-        lastGovernanceSurface = await applyCorrection(editor, output, false, inFlightDocuments, statusItem, "manual");
+        extensionState.lastGovernanceSurface = await applyCorrection(editor, output, false, inFlightDocuments, statusItem, "manual");
     });
 
     const correctSelection = vscode.commands.registerCommand("prefixPython.correctSelection", async () => {
@@ -39,18 +59,18 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
 
-        lastGovernanceSurface = await applyCorrection(editor, output, true, inFlightDocuments, statusItem, "manual");
+        extensionState.lastGovernanceSurface = await applyCorrection(editor, output, true, inFlightDocuments, statusItem, "manual");
     });
 
     const showGovernanceSurface = vscode.commands.registerCommand("prefixPython.showGovernanceSurface", () => {
-        if (!lastGovernanceSurface) {
+        if (!extensionState.lastGovernanceSurface) {
             void vscode.window.showInformationMessage("PREFIX has no transition governance surface yet. Run PREFIX on Python text first.");
             return;
         }
         output.appendLine("");
         output.appendLine("Last PREFIX governance surface");
         output.appendLine("--------------------------------");
-        for (const line of lastGovernanceSurface) {
+        for (const line of extensionState.lastGovernanceSurface) {
             output.appendLine(line);
         }
         output.show(true);
@@ -62,6 +82,10 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
 
+        const singleChange = event.contentChanges.length === 1 ? event.contentChanges[0] : null;
+        const cursorLine = singleChange
+            ? deriveEnterCursorLine(singleChange.range.start.line, singleChange.text, editor.selection.active.line)
+            : editor.selection.active.line;
         const enterPlan = buildEnterCorrectionPlan({
             activeDocumentId: editor.document.uri.toString(),
             changeCount: event.contentChanges.length,
@@ -69,7 +93,7 @@ export function activate(context: vscode.ExtensionContext) {
                 rangeLength: change.rangeLength,
                 text: change.text,
             })),
-            cursorLine: editor.selection.active.line,
+            cursorLine,
             documentId: event.document.uri.toString(),
             documentInFlight: inFlightDocuments.has(event.document.uri.toString()),
             documentText: event.document.getText(),
@@ -84,11 +108,21 @@ export function activate(context: vscode.ExtensionContext) {
 
         const governanceSurface = await applyCorrection(editor, output, false, inFlightDocuments, statusItem, "enter", enterPlan);
         if (governanceSurface) {
-            lastGovernanceSurface = governanceSurface;
+            extensionState.lastGovernanceSurface = governanceSurface;
         }
     });
 
     context.subscriptions.push(output, statusItem, correctDocument, correctSelection, showGovernanceSurface, onDidChange);
+
+    const api: PrefixExtensionApi = {
+        getLastEngineError: () => extensionState.lastEngineError,
+        getLastGovernanceSurface: () => extensionState.lastGovernanceSurface,
+        getLastOutcome: () => extensionState.lastOutcome,
+        getResolvedInvocation: () => resolvePythonInvocation(
+            vscode.workspace.getConfiguration("prefixPython").get<string>("pythonCommand", ""),
+        ),
+    };
+    return api;
 }
 
 async function applyCorrection(
@@ -128,6 +162,8 @@ async function applyCorrection(
             setStatus(statusItem, "refused", "Engine unavailable");
             return null;
         }
+        extensionState.lastEngineError = null;
+        extensionState.lastOutcome = response;
 
         if (response.status === "ACCEPT_VALID") {
             emitProofSurface(output, response);
@@ -218,21 +254,29 @@ async function runEngine(
     output: vscode.OutputChannel,
 ): Promise<EngineResponse | null> {
     const config = vscode.workspace.getConfiguration("prefixPython");
-    const pythonCommand = config.get<string>("pythonCommand", "python");
+    const invocation = resolvePythonInvocation(config.get<string>("pythonCommand", ""));
     const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    extensionState.lastEngineError = null;
+    extensionState.lastOutcome = null;
 
     return new Promise((resolve) => {
+        let settled = false;
         const child = spawn(
-            pythonCommand,
-            ["-m", "prefix_python", "--stdin", "--json"],
+            invocation.command,
+            [...invocation.prefixArgs, "-m", "prefix_python", "--stdin", "--json"],
             {
                 cwd,
                 shell: false,
             },
         );
         const timeoutHandle = setTimeout(() => {
+            if (settled) {
+                return;
+            }
+            settled = true;
             child.kill();
             const message = `PREFIX timed out while processing ${documentPath}.`;
+            extensionState.lastEngineError = `${message} Engine command: ${formatInvocation(invocation)}.`;
             output.appendLine(message);
             output.show(true);
             void vscode.window.showErrorMessage(message);
@@ -251,8 +295,13 @@ async function runEngine(
         });
 
         child.on("error", (error) => {
+            if (settled) {
+                return;
+            }
+            settled = true;
             clearTimeout(timeoutHandle);
-            const message = `PREFIX could not start the local engine for ${documentPath}: ${error.message}`;
+            const message = `PREFIX could not start its CPython 3.12 engine for ${documentPath}: ${error.message}. Expected ${formatInvocation(invocation)}. Reinstall PREFIX for Python or set prefixPython.pythonCommand to a valid CPython 3.12 executable.`;
+            extensionState.lastEngineError = message;
             output.appendLine(message);
             output.show(true);
             void vscode.window.showErrorMessage(message);
@@ -260,6 +309,10 @@ async function runEngine(
         });
 
         child.on("close", () => {
+            if (settled) {
+                return;
+            }
+            settled = true;
             clearTimeout(timeoutHandle);
             if (stderr.trim()) {
                 output.appendLine(stderr.trim());
@@ -269,7 +322,8 @@ async function runEngine(
                 const parsed = JSON.parse(stdout) as EngineResponse;
                 resolve(parsed);
             } catch {
-                const message = "PREFIX returned an unreadable response. Confirm that `prefix-python` is installed in the configured interpreter.";
+                const message = `PREFIX returned an unreadable response from ${formatInvocation(invocation)}. Confirm that the configured runtime is CPython 3.12 with PREFIX for Python installed.`;
+                extensionState.lastEngineError = message;
                 output.appendLine(stdout.trim());
                 output.appendLine(message);
                 output.show(true);

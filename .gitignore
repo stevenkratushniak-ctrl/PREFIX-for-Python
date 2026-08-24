@@ -8,3 +8,9 @@ dist/
 editor/vscode/node_modules/
 editor/vscode/out/
 editor/vscode/*.vsix
+qualification/_work/
+qualification/_hardening_artifacts/
+qualification/_cache/
+qualification/write_test.tmp
+release/
+installer/_payload/

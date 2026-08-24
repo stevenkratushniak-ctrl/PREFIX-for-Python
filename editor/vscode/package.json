@@ -44,8 +44,8 @@
       "properties": {
         "prefixPython.pythonCommand": {
           "type": "string",
-          "default": "python",
-          "description": "Python executable used to invoke the local prefix-python engine."
+          "default": "",
+          "description": "Optional CPython 3.12 executable override. Leave blank to use the PREFIX-installed engine automatically."
         },
         "prefixPython.enableOnEnter": {
           "type": "boolean",
@@ -67,14 +67,13 @@
     ]
   },
   "scripts": {
-    "build": "npx --no-install tsc -p .",
-    "package": "npx --no-install vsce package --allow-missing-repository",
+    "build": "node node_modules/typescript/bin/tsc -p .",
+    "package": "python package_vsix.py",
     "test:behavior": "node response.test.js"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
     "@types/vscode": "^1.85.0",
-    "@vscode/vsce": "^3.9.1",
     "typescript": "^5.4.5"
   }
 }
