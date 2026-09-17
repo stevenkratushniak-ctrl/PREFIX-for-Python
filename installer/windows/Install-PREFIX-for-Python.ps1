@@ -6,6 +6,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
+. (Join-Path $PSScriptRoot "Invoke-VSCode.ps1")
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 $ProductVersion = "0.1.0"
@@ -141,14 +142,14 @@ try {
     $CodeArgs = @("--install-extension", (Join-Path $InstallRoot "assets\prefix-python-0.1.0.vsix"), "--force")
     if ($env:PREFIX_VSCODE_EXTENSIONS_DIR) { $CodeArgs += @("--extensions-dir", $env:PREFIX_VSCODE_EXTENSIONS_DIR) }
     if ($env:PREFIX_VSCODE_USER_DATA_DIR) { $CodeArgs += @("--user-data-dir", $env:PREFIX_VSCODE_USER_DATA_DIR) }
-    $codeOutput = & $ResolvedCodeCli @CodeArgs 2>&1
-    if ($LASTEXITCODE -ne 0) { Stop-Install "VS Code extension installation failed: $codeOutput" }
+    $codeResult = Invoke-PrefixVSCode $ResolvedCodeCli $CodeArgs
+    if ($codeResult.ExitCode -ne 0) { Stop-Install "VS Code extension installation failed: $($codeResult.Output)" }
     $ListArgs = @("--list-extensions")
     if ($env:PREFIX_VSCODE_EXTENSIONS_DIR) { $ListArgs += @("--extensions-dir", $env:PREFIX_VSCODE_EXTENSIONS_DIR) }
     if ($env:PREFIX_VSCODE_USER_DATA_DIR) { $ListArgs += @("--user-data-dir", $env:PREFIX_VSCODE_USER_DATA_DIR) }
-    $installedExtensions = & $ResolvedCodeCli @ListArgs 2>&1
-    if ($LASTEXITCODE -ne 0 -or -not ($installedExtensions -match "(?m)^fastindustries\.prefix-python$")) {
-        Stop-Install "VS Code did not report the installed PREFIX extension after setup: $installedExtensions"
+    $listResult = Invoke-PrefixVSCode $ResolvedCodeCli $ListArgs
+    if ($listResult.ExitCode -ne 0 -or -not ($listResult.Output -match "(?m)^fastindustries\.prefix-python$")) {
+        Stop-Install "VS Code did not report the installed PREFIX extension after setup: $($listResult.Output)"
     }
 
     $finalPython = Join-Path $InstallRoot "runtime\python.exe"

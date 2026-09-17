@@ -168,7 +168,7 @@ def _build_windows_package(temp: Path, wheel: Path, vsix: Path, python_archive: 
     package = temp / "windows" / f"{RELEASE_ID}-windows-x64"
     payload = package / "payload"
     payload.mkdir(parents=True)
-    for name in ["Install-PREFIX-for-Python.cmd", "Install-PREFIX-for-Python.ps1", "Uninstall-PREFIX-for-Python.cmd", "Uninstall-PREFIX-for-Python.ps1"]:
+    for name in ["Install-PREFIX-for-Python.cmd", "Install-PREFIX-for-Python.ps1", "Uninstall-PREFIX-for-Python.cmd", "Uninstall-PREFIX-for-Python.ps1", "Invoke-VSCode.ps1"]:
         shutil.copy2(ROOT / "installer" / "windows" / name, package / name)
     for source in [wheel, vsix, python_archive, ROOT / "examples" / "broken_missing_colon.txt", ROOT / "examples" / "broken_return_outside_function.txt"]:
         shutil.copy2(source, payload / source.name)
