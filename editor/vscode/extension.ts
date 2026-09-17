@@ -8,6 +8,7 @@ import {
     EngineResponse,
     isAdvisedOutcome,
     shouldApplyMutation,
+    validateEngineResponse,
 } from "./response";
 
 export type PrefixExtensionApi = {
@@ -142,8 +143,6 @@ async function applyCorrection(
         return null;
     }
 
-    inFlightDocuments.add(documentKey);
-    setStatus(statusItem, "working");
     const selection = editor.selection;
     if (selectionOnly && selection.isEmpty) {
         setStatus(statusItem, "refused", "Selection correction requires explicit text");
@@ -152,6 +151,9 @@ async function applyCorrection(
         }
         return null;
     }
+    inFlightDocuments.add(documentKey);
+    setStatus(statusItem, "working");
+    const sourceVersion = editor.document.version;
     const source = selectionOnly && !selection.isEmpty
         ? editor.document.getText(selection)
         : editor.document.getText();
@@ -160,6 +162,13 @@ async function applyCorrection(
         const response = await runEngine(source, editor.document.uri.fsPath, output);
         if (!response) {
             setStatus(statusItem, "refused", "Engine unavailable");
+            return null;
+        }
+        if (editor.document.isClosed || editor.document.version !== sourceVersion) {
+            extensionState.lastOutcome = null;
+            extensionState.lastEngineError = "document_changed: PREFIX kept your newer edits. Run the correction again on the current text.";
+            output.appendLine(extensionState.lastEngineError);
+            setStatus(statusItem, "refused", extensionState.lastEngineError);
             return null;
         }
         extensionState.lastEngineError = null;
@@ -219,7 +228,7 @@ async function applyCorrection(
             return buildWhySurface(response).lines;
         }
 
-        await editor.edit((editBuilder) => {
+        const applied = await editor.edit((editBuilder) => {
             if (selectionOnly && !selection.isEmpty) {
                 editBuilder.replace(selection, response.source);
                 return;
@@ -231,6 +240,14 @@ async function applyCorrection(
             );
             editBuilder.replace(fullRange, response.source);
         });
+
+        if (!applied) {
+            extensionState.lastOutcome = null;
+            extensionState.lastEngineError = "edit_not_applied: VS Code declined the edit. No correction was committed.";
+            output.appendLine(extensionState.lastEngineError);
+            setStatus(statusItem, "refused", extensionState.lastEngineError);
+            return null;
+        }
 
         if (invocationSurface === "enter" && enterPlan) {
             placeEnterSelection(editor, response, enterPlan);
@@ -286,12 +303,28 @@ async function runEngine(
         let stdout = "";
         let stderr = "";
 
+        child.stdin.on("error", (error) => {
+            if (settled) { return; }
+            settled = true;
+            clearTimeout(timeoutHandle);
+            child.kill();
+            extensionState.lastEngineError = `PREFIX engine input failed: ${error.message}`;
+            resolve(null);
+        });
+
         child.stdout.on("data", (chunk) => {
             stdout += chunk.toString();
+            if (Buffer.byteLength(stdout, "utf8") > 16 * 1024 * 1024 && !settled) {
+                settled = true;
+                clearTimeout(timeoutHandle);
+                child.kill();
+                extensionState.lastEngineError = "PREFIX engine response exceeded the 16 MiB boundary.";
+                resolve(null);
+            }
         });
 
         child.stderr.on("data", (chunk) => {
-            stderr += chunk.toString();
+            if (stderr.length < 65536) { stderr += chunk.toString().slice(0, 65536 - stderr.length); }
         });
 
         child.on("error", (error) => {
@@ -319,12 +352,11 @@ async function runEngine(
             }
 
             try {
-                const parsed = JSON.parse(stdout) as EngineResponse;
+                const parsed = validateEngineResponse(JSON.parse(stdout), source);
                 resolve(parsed);
             } catch {
                 const message = `PREFIX returned an unreadable response from ${formatInvocation(invocation)}. Confirm that the configured runtime is CPython 3.12 with PREFIX for Python installed.`;
                 extensionState.lastEngineError = message;
-                output.appendLine(stdout.trim());
                 output.appendLine(message);
                 output.show(true);
                 void vscode.window.showErrorMessage(message);

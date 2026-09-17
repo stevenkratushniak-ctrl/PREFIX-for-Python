@@ -1,8 +1,13 @@
 # PREFIX for Python
 
+This checkout is the private 0.1.0 customer-qualification repair candidate. Its
+source identity and package hashes differ from the public v0.1.0 release. See
+`FINAL_RELEASE_NOTES.md` and the candidate's accompanying qualification record;
+historical platform results below are retained evidence, not new test results.
+
 `PREFIX for Python` is a deterministic Python prefix layer for bounded correctness.
 
-It operates before failure, before invalidity, and before execution. The engine intercepts a bounded set of invalid Python structural states, applies mapped `ALWAYS_SAFE` corrections when one lawful continuation exists, advises ranked candidates when no singular auto-apply path exists, and refuses the transition when the state is unsupported or unsafe.
+It examines source text before execution. The engine recognizes a bounded set of Python structural errors, applies mapped deterministic corrections, advises ranked candidates where automatic correction is not justified, and refuses unsupported cases. `ALWAYS_SAFE` is an internal rule classification, not a guarantee of program intent, correctness, or absence of bugs.
 
 This repository is the sealed standalone product root for the Python release only. It does not depend on remote inference, cloud routing, or probabilistic repair.
 
@@ -16,7 +21,7 @@ This repository is the sealed standalone product root for the Python release onl
 - before debugging burden accrues
 - inside Python only for the current sealed release
 
-This release preserves deterministic correction, finite grammar theory, refusal semantics, anti-hallucination posture, local-first execution, and operational certainty.
+This release provides deterministic structural correction, explicit refusals, and local-first processing. It does not execute or prove the business logic of the code being examined.
 
 ## Python Lane Model
 
@@ -65,7 +70,7 @@ It is a deterministic Python prefix layer:
 - empty function or class bodies
 - simple unmatched opening delimiters
 - singular extra closing delimiters
-- tabs normalized to four spaces
+- indentation tabs normalized to four spaces only where literal contents and parse-valid program structure are preserved
 
 Advice and analysis stay separate from apply. Example:
 

@@ -30,6 +30,8 @@ async function run() {
     await testAdviceWithoutMutation(api);
     await testRefusalWithoutMutation(api);
     await testEnterCorrection(api);
+    await testPreservesLiteralData(api);
+    await testConcurrentTyping(api, configuration);
     await testInvalidInterpreter(api, configuration);
     await testWrongInterpreter(api, configuration);
     await testTimeout(api, configuration);
@@ -97,6 +99,31 @@ async function testInvalidInterpreter(api, configuration) {
     await vscode.commands.executeCommand("prefixPython.correctDocument");
     assert.match(api.getLastEngineError(), /could not start its CPython 3\.12 engine/i);
     assert.equal(api.getLastOutcome(), null);
+}
+
+async function testPreservesLiteralData(api) {
+    const source = 'value = "a\tb"\n';
+    const editor = await showPython(source);
+    await vscode.commands.executeCommand("prefixPython.correctDocument");
+    assert.equal(editor.document.getText(), source);
+    assert.equal(api.getLastOutcome().status, "ACCEPT_VALID");
+}
+
+async function testConcurrentTyping(api, configuration) {
+    await configuration.update("enableOnEnter", false, vscode.ConfigurationTarget.Global);
+    const source = "if True\n    print('x')\n" + "value = 1\n".repeat(4000);
+    const editor = await showPython(source);
+    const pending = vscode.commands.executeCommand("prefixPython.correctDocument");
+    // The real command has spawned the real packaged engine; change the document
+    // before its asynchronous result returns. No replacement engine is used.
+    await new Promise(resolve => setTimeout(resolve, 20));
+    const marker = "# newer customer typing\n";
+    assert.equal(await editor.edit(builder => builder.insert(new vscode.Position(0, 0), marker)), true);
+    await pending;
+    assert.equal(editor.document.getText(), marker + source);
+    assert.match(api.getLastEngineError(), /document_changed/);
+    assert.equal(api.getLastOutcome(), null);
+    await configuration.update("enableOnEnter", true, vscode.ConfigurationTarget.Global);
 }
 
 async function testWrongInterpreter(api, configuration) {

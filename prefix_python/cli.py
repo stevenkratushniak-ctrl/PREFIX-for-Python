@@ -3,7 +3,10 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
+import re
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
@@ -16,6 +19,7 @@ from .engine import (
     LANE_APPLY,
     STATE_APPLIED,
     STATE_REFUSED,
+    MAX_SOURCE_BYTES,
     correct_source,
 )
 
@@ -63,12 +67,12 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         if args.stdin:
-            source = sys.stdin.read()
+            source = sys.stdin.buffer.read(MAX_SOURCE_BYTES + 1).decode("utf-8")
             source_path: Path | None = None
             source_path_was_symlink = False
         else:
             source_argument = Path(args.path)
-            source_path_was_symlink = source_argument.is_symlink()
+            source_path_was_symlink = _has_link(source_argument)
             source_path = source_argument.resolve()
             if not source_path.exists():
                 return _emit_cli_refusal(
@@ -83,7 +87,8 @@ def main(argv: list[str] | None = None) -> int:
                     refusal_code="path_not_file",
                     path=str(source_path),
                 )
-            source = source_path.read_text(encoding="utf-8")
+            with source_path.open("rb") as source_handle:
+                source = source_handle.read(MAX_SOURCE_BYTES + 1).decode("utf-8")
     except UnicodeDecodeError:
         return _emit_cli_refusal(
             args.json,
@@ -118,16 +123,16 @@ def main(argv: list[str] | None = None) -> int:
     if apply_requested and source_path is not None:
         if result.status == ACCEPT_FIXED:
             try:
-                _atomic_write_text(source_path, result.source)
-                receipt_path = str(
-                    _write_apply_receipt(
-                        source_path,
-                        source,
-                        result.source,
-                        result,
-                        _resolve_receipt_dir(source_path, args.receipt_dir),
+                with _mutation_lock(source_path):
+                    _require_preimage(source_path, source)
+                    receipt_path = str(
+                        _write_apply_receipt(
+                            source_path, source, result.source, result,
+                            _resolve_receipt_dir(source_path, args.receipt_dir),
+                        )
                     )
-                )
+                    _require_preimage(source_path, source)
+                    _atomic_write_text(source_path, result.source)
                 wrote = True
             except OSError as exc:
                 return _emit_cli_refusal(
@@ -168,7 +173,11 @@ def _run_rollback(args: argparse.Namespace) -> int:
     if error_exit is not None:
         return error_exit
 
-    target_path = Path(payload.get("path", "")).resolve()
+    target_argument = Path(payload["path"])
+    if _has_link(target_argument):
+        return _emit_cli_refusal(args.json, refusal_reason="Rollback refuses a symbolic-link or junction target.",
+                                 refusal_code="rollback_symlink_refused")
+    target_path = target_argument.resolve()
     if args.path is not None and Path(args.path).resolve() != target_path:
         return _emit_cli_refusal(
             args.json,
@@ -189,7 +198,11 @@ def _run_rollback(args: argparse.Namespace) -> int:
     after_source = payload.get("after_source", "")
     before_sha256 = payload.get("before_sha256", "")
     after_sha256 = payload.get("after_sha256", "")
-    current_source = target_path.read_text(encoding="utf-8")
+    try:
+        current_source = target_path.read_bytes().decode("utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        return _emit_cli_refusal(args.json, refusal_reason=f"Cannot read rollback target: {exc}",
+                                 refusal_code="rollback_target_unreadable", path=str(target_path))
 
     if _sha256_text(current_source) != after_sha256:
         return _emit_cli_refusal(
@@ -217,14 +230,14 @@ def _run_rollback(args: argparse.Namespace) -> int:
         )
 
     try:
-        _atomic_write_text(target_path, before_source)
-        rollback_receipt = _write_rollback_receipt(
-            target_path,
-            before_source,
-            after_source,
-            receipt_path,
-            _resolve_receipt_dir(target_path, args.receipt_dir),
-        )
+        with _mutation_lock(target_path):
+            _require_preimage(target_path, current_source)
+            rollback_receipt = _write_rollback_receipt(
+                target_path, before_source, after_source, receipt_path,
+                _resolve_receipt_dir(target_path, args.receipt_dir),
+            )
+            _require_preimage(target_path, current_source)
+            _atomic_write_text(target_path, before_source)
     except OSError as exc:
         return _emit_cli_refusal(
             args.json,
@@ -271,8 +284,13 @@ def _run_inspect_receipt(args: argparse.Namespace) -> int:
         return error_exit
 
     receipt_dir = receipt_path.parent
+    try:
+        target = Path(payload["path"])
+        target_matches = not _has_link(target) and hashlib.sha256(target.read_bytes()).hexdigest() == payload["after_sha256"]
+    except OSError:
+        target_matches = False
     inspection_payload = {
-        "accepted": True,
+        "accepted": target_matches,
         "chain_depth": _receipt_chain_depth(receipt_dir, payload),
         "lane": LANE_ANALYZE,
         "lineage_id": payload.get("lineage_id"),
@@ -286,13 +304,17 @@ def _run_inspect_receipt(args: argparse.Namespace) -> int:
             "receipt_id": payload.get("receipt_id"),
             "rollback_ready": bool(payload.get("rollback_ready", False)),
             "transition_sha256": payload.get("transition_sha256"),
+            "receipt_content_verified": True,
+            "target_matches_postimage": target_matches,
+            "custody_scope": "local content hash, not an authenticated signature or execution attestation",
         },
         "receipt_kind": payload.get("receipt_kind"),
         "receipt_path": str(receipt_path),
         "replay_verified": False,
         "source": "",
-        "state": STATE_APPLIED,
-        "status": ACCEPT_VALID,
+        "state": STATE_APPLIED if target_matches else STATE_REFUSED,
+        "status": ACCEPT_VALID if target_matches else "REFUSE_INVALID",
+        "refusal_code": None if target_matches else "receipt_target_postimage_mismatch",
         "version": VERSION,
         "wrote": False,
     }
@@ -300,7 +322,7 @@ def _run_inspect_receipt(args: argparse.Namespace) -> int:
         sys.stdout.write(json.dumps(inspection_payload, indent=2, sort_keys=True) + "\n")
     else:
         _print_human(inspection_payload)
-    return 0
+    return 0 if target_matches else 2
 
 
 def _run_replay_receipt(args: argparse.Namespace) -> int:
@@ -470,9 +492,12 @@ def _emit_cli_refusal(
 def _atomic_write_text(path: Path, content: str) -> None:
     temp_name: str | None = None
     try:
-        with NamedTemporaryFile("w", encoding="utf-8", dir=str(path.parent), delete=False) as handle:
-            handle.write(content)
+        with NamedTemporaryFile("wb", dir=str(path.parent), delete=False) as handle:
             temp_name = handle.name
+            handle.write(content.encode("utf-8"))
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.chmod(temp_name, path.stat().st_mode)
         Path(temp_name).replace(path)
     finally:
         if temp_name:
@@ -482,6 +507,9 @@ def _atomic_write_text(path: Path, content: str) -> None:
 
 
 def _resolve_receipt_dir(path: Path, configured: str | None) -> Path:
+    candidate = Path(configured) if configured else path.parent / ".prefix-python-receipts"
+    if _has_link(candidate):
+        raise OSError("receipt_symlink_refused: receipt directory must not traverse links or junctions")
     if configured:
         receipt_dir = Path(configured).resolve()
     else:
@@ -582,8 +610,18 @@ def _write_receipt(receipt_dir: Path, payload: dict[str, object]) -> Path:
     wrapped["receipt_id"] = f"sha256:{receipt_id}"
     wrapped["receipt_sha256"] = receipt_id
     receipt_path = receipt_dir / f"{receipt_id}.json"
-    if not receipt_path.exists():
-        receipt_path.write_text(json.dumps(wrapped, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    if receipt_path.exists() or receipt_path.is_symlink():
+        if _safe_read_receipt(receipt_path) != wrapped:
+            raise OSError("receipt_existing_content_mismatch")
+    else:
+        # Durable preimage and transition must exist before the source can change.
+        # A crash here leaves a prepared receipt; inspect checks the actual target.
+        with receipt_path.open("x", encoding="utf-8", newline="\n") as handle:
+            handle.write(json.dumps(wrapped, indent=2, sort_keys=True) + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        if _safe_read_receipt(receipt_path) != wrapped:
+            raise OSError("receipt_readback_mismatch")
     return receipt_path
 
 
@@ -628,21 +666,34 @@ def _find_parent_receipt_id(receipt_dir: Path, path: Path, before_sha256: str) -
 
 def _safe_read_receipt(path: Path) -> dict[str, object]:
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
+        if _has_link(path):
+            raise ValueError("linked receipt")
+        with path.open("rb") as handle:
+            raw = handle.read(16 * 1024 * 1024 + 1)
+        if len(raw) > 16 * 1024 * 1024:
+            raise ValueError("receipt exceeds 16 MiB")
+        payload = json.loads(raw.decode("utf-8"), object_pairs_hook=_unique_object)
+        _validate_receipt(payload)
+        return payload
+    except (ValueError, TypeError, KeyError, UnicodeError, RecursionError) as exc:
+        raise OSError(f"receipt_invalid: {exc}") from exc
 
 
 def _receipt_chain_depth(receipt_dir: Path, payload: dict[str, object]) -> int:
     depth = 0
     parent_receipt_id = payload.get("parent_receipt_id")
     seen: set[str] = set()
-    while isinstance(parent_receipt_id, str) and parent_receipt_id and parent_receipt_id not in seen:
+    while parent_receipt_id:
+        if parent_receipt_id in seen or depth >= 256:
+            raise OSError("receipt_chain_invalid: cyclic or excessive chain")
         seen.add(parent_receipt_id)
         depth += 1
         parent_path = receipt_dir / f"{parent_receipt_id.removeprefix('sha256:')}.json"
         parent_payload = _safe_read_receipt(parent_path)
-        parent_receipt_id = parent_payload.get("parent_receipt_id")
+        if parent_payload["path"] != payload["path"] or parent_payload["after_sha256"] != payload["before_sha256"]:
+            raise OSError("receipt_chain_invalid: disconnected transition")
+        payload = parent_payload
+        parent_receipt_id = parent_payload["parent_receipt_id"]
     return depth
 
 
@@ -656,11 +707,99 @@ def _load_receipt(receipt_argument: str, json_mode: bool, operation_name: str) -
         )
 
     try:
-        payload = json.loads(receipt_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        payload = _safe_read_receipt(Path(receipt_argument))
+        _receipt_chain_depth(receipt_path.parent, payload)
+    except OSError as exc:
         return {}, receipt_path, _emit_cli_refusal(
             json_mode,
             refusal_reason=f"PREFIX could not parse {operation_name} receipt `{receipt_path}`: {exc}",
             refusal_code=f"{operation_name}_receipt_invalid",
         )
     return payload, receipt_path, None
+
+
+def _unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate receipt field: {key}")
+        result[key] = value
+    return result
+
+
+def _validate_receipt(payload) -> None:
+    common = {"after_sha256", "after_source", "after_authority", "before_sha256", "before_source",
+              "before_authority", "chain_sha256", "lineage_id", "parent_receipt_id", "path",
+              "python_version_pin", "receipt_kind", "receipt_version", "rollback_ready", "tool_version",
+              "transition_sha256", "receipt_id", "receipt_sha256"}
+    if not isinstance(payload, dict) or payload.get("receipt_kind") not in {"apply", "rollback"}:
+        raise ValueError("unknown receipt shape or kind")
+    extra = "engine_result" if payload["receipt_kind"] == "apply" else "parent_receipt_path"
+    if set(payload) != common | {extra}:
+        raise ValueError("missing or unrecognized receipt fields")
+    for field in ("path", "before_source", "after_source", "lineage_id", "receipt_id", "receipt_sha256"):
+        if not isinstance(payload[field], str):
+            raise ValueError(f"invalid {field}")
+    if not Path(payload["path"]).is_absolute() or payload["receipt_version"] != RECEIPT_VERSION or payload["tool_version"] != VERSION or payload["python_version_pin"] != "3.12":
+        raise ValueError("receipt authority/version mismatch")
+    parent = payload["parent_receipt_id"]
+    if parent is not None and (not isinstance(parent, str) or not re.fullmatch(r"sha256:[0-9a-f]{64}", parent)):
+        raise ValueError("invalid parent receipt identity")
+    unwrapped = {key: value for key, value in payload.items() if key not in {"receipt_id", "receipt_sha256"}}
+    digest = _sha256_text(_canonical_json(unwrapped))
+    if payload["receipt_sha256"] != digest or payload["receipt_id"] != f"sha256:{digest}":
+        raise ValueError("receipt content hash mismatch")
+    for prefix in ("before", "after"):
+        if len(payload[f"{prefix}_source"].encode("utf-8")) > MAX_SOURCE_BYTES:
+            raise ValueError(f"{prefix} source exceeds the input boundary")
+        if payload[f"{prefix}_sha256"] != _sha256_text(payload[f"{prefix}_source"]):
+            raise ValueError(f"{prefix} source hash mismatch")
+        if payload[f"{prefix}_authority"] != _authority_snapshot(payload[f"{prefix}_source"]):
+            raise ValueError(f"{prefix} authority mismatch")
+    if payload["lineage_id"] != f"sha256:{_sha256_text(payload['path'])}":
+        raise ValueError("lineage mismatch")
+    transition = {key: payload[key] for key in ("after_sha256", "before_sha256", "path")}
+    chain_transition = transition.copy()
+    transition[extra] = payload[extra]
+    if extra == "engine_result":
+        if not isinstance(payload[extra], dict) or payload[extra].get("source") != payload["after_source"] or payload[extra].get("status") != ACCEPT_FIXED:
+            raise ValueError("invalid engine result")
+        chain_transition = transition
+    elif not isinstance(payload[extra], str) or not Path(payload[extra]).is_absolute():
+        raise ValueError("invalid rollback parent path")
+    if payload["transition_sha256"] != _sha256_text(_canonical_json(transition)):
+        raise ValueError("transition hash mismatch")
+    if payload["chain_sha256"] != _sha256_text(f"{parent or 'ROOT'}|{_sha256_text(_canonical_json(chain_transition))}"):
+        raise ValueError("chain hash mismatch")
+    expected_rollback_ready = payload["before_authority"]["is_valid"] if extra == "engine_result" else payload["after_authority"]["is_valid"]
+    if type(payload["rollback_ready"]) is not bool or payload["rollback_ready"] != expected_rollback_ready:
+        raise ValueError("rollback boundary mismatch")
+
+
+def _has_link(path: Path) -> bool:
+    return any(part.is_symlink() or part.is_junction() for part in (path.absolute(), *path.absolute().parents))
+
+
+def _require_preimage(path: Path, expected: str) -> None:
+    if _has_link(path) or path.read_bytes() != expected.encode("utf-8"):
+        raise OSError("source_changed: source no longer matches the reviewed preimage")
+
+
+@contextmanager
+def _mutation_lock(path: Path):
+    """Serialize PREFIX writers; OS releases the lock even if this process exits."""
+    lock = path.with_name(f".{path.name}.prefix-python.lock")
+    if _has_link(lock):
+        raise OSError("write_lock_link_refused")
+    with lock.open("a+b") as handle:
+        if handle.tell() == 0:
+            handle.write(b"\0")
+            handle.flush()
+        handle.seek(0)
+        if os.name == "nt":
+            import msvcrt
+            msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        yield

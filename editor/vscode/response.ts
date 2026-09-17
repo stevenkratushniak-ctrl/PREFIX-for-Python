@@ -97,7 +97,33 @@ export type EngineResponse = {
 };
 
 export function shouldApplyMutation(response: EngineResponse): boolean {
-    return response.state === "APPLIED" && response.status === "ACCEPT_FIXED";
+    return response.state === "APPLIED" && response.status === "ACCEPT_FIXED" && response.parse_reparse_validated === true;
+}
+
+export function validateEngineResponse(value: unknown, input: string): EngineResponse {
+    if (!value || typeof value !== "object" || Array.isArray(value)) { throw new Error("invalid engine response"); }
+    const record = value as Record<string, unknown>;
+    const statuses = ["ACCEPT_VALID", "ACCEPT_FIXED", "REFUSE_UNMAPPED", "REFUSE_AMBIGUOUS", "REFUSE_INVALID"];
+    const hash = (text: string) => createHash("sha256").update(text, "utf8").digest("hex");
+    if (!statuses.includes(record.status as string) || typeof record.source !== "string"
+        || record.input_sha256 !== hash(input) || record.output_sha256 !== hash(record.source)
+        || !["APPLIED", "ADVISED", "REFUSED"].includes(record.state as string)
+        || !["APPLY", "ADVISE", "ANALYZE", "ROADMAP"].includes(record.lane as string)
+        || !Array.isArray(record.events) || !Array.isArray(record.candidates)
+        || !record.events.every(event => event && typeof event === "object"
+            && ["rule_id", "before", "after", "reason"].every(key => typeof event[key] === "string")
+            && Number.isInteger(event.line) && event.line > 0)) {
+        throw new Error("unbound or malformed engine response");
+    }
+    if (String(record.status).startsWith("ACCEPT_")) {
+        if (record.state !== "APPLIED" || record.lane !== "APPLY" || record.parse_reparse_validated !== true
+            || (record.status === "ACCEPT_VALID" && record.source !== input)) {
+            throw new Error("unproven accepted response");
+        }
+    } else if (record.source !== input || record.mutation_performed !== false || record.state === "APPLIED") {
+        throw new Error("refusal cannot authorize mutation");
+    }
+    return value as EngineResponse;
 }
 
 export function isAdvisedOutcome(response: EngineResponse): boolean {
@@ -129,8 +155,8 @@ export function buildOutcomeMessage(response: EngineResponse): string {
         case "ACCEPT_FIXED": {
             const summary = response.events.map((event) => `${event.rule_id} line ${event.line}`).join(", ");
             return summary
-                ? `PREFIX applied an ALWAYS_SAFE Python governed transition. ${summary}`
-                : "PREFIX applied an ALWAYS_SAFE Python governed transition.";
+                ? `PREFIX applied a mapped structural correction. Review the change. ${summary}`
+                : "PREFIX applied a mapped structural correction. Review the change.";
         }
         case "REFUSE_AMBIGUOUS": {
             const candidateSummary = (response.candidates ?? [])
@@ -328,3 +354,4 @@ function formatRecord(value: Record<string, unknown>): string {
         .map((key) => `${key}=${String(value[key])}`)
         .join(", ");
 }
+import { createHash } from "node:crypto";

@@ -196,6 +196,13 @@ def diff_ast(old_ast: ast.AST, new_ast: ast.AST) -> dict[str, object]:
 
 def validate_source_text(code: str) -> AstValidationResult:
     try:
+        return _validate_source_text(code)
+    except (RecursionError, MemoryError) as exc:
+        return AstValidationResult(is_valid=False, failure_reason=f"Python structural resource boundary: {type(exc).__name__}")
+
+
+def _validate_source_text(code: str) -> AstValidationResult:
+    try:
         tree = parse_to_ast(code)
         compile(code, "<prefix-python>", "exec")
     except RuntimeError as exc:

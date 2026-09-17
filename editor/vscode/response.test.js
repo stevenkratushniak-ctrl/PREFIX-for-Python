@@ -1,4 +1,5 @@
 const assert = require("node:assert/strict");
+const { createHash } = require("node:crypto");
 const { buildEnterCorrectionPlan, deriveEnterCursorLine, shouldApplyEnterMutation } = require("./out/enter.js");
 const { installedRuntimeCandidates, resolvePythonInvocation } = require("./out/runtime.js");
 assert.equal(deriveEnterCursorLine(4, "\r\n    ", 4), 5);
@@ -9,6 +10,7 @@ const {
     isAdvisedOutcome,
     isAnalyzeOutcome,
     shouldApplyMutation,
+    validateEngineResponse,
 } = require("./out/response.js");
 
 const acceptedFixed = {
@@ -142,7 +144,7 @@ assert.equal(isAdvisedOutcome(advised), true);
 assert.equal(isAnalyzeOutcome(analyzed), true);
 assert.equal(isAnalyzeOutcome(refusedRoadmap), false);
 
-assert.match(buildOutcomeMessage(acceptedFixed), /ALWAYS_SAFE Python governed transition/i);
+assert.match(buildOutcomeMessage(acceptedFixed), /mapped structural correction\. Review the change/i);
 assert.match(buildOutcomeMessage(acceptedValid), /already lawful/i);
 assert.match(buildOutcomeMessage(advised), /advised ranked Python continuations/i);
 assert.match(buildOutcomeMessage(analyzed), /analyzed the Python state/i);
@@ -320,4 +322,13 @@ assert.equal(
     false,
 );
 
+const input = "if ready\nprint('x')\n";
+const hash = text => createHash("sha256").update(text, "utf8").digest("hex");
+const bound = { ...acceptedFixed, candidates: [], input_sha256: hash(input), output_sha256: hash(acceptedFixed.source) };
+assert.equal(validateEngineResponse(bound, input), bound);
+for (const altered of [null, [], {}, { ...bound, input_sha256: "0".repeat(64) },
+    { ...bound, output_sha256: "0".repeat(64) }, { ...bound, parse_reparse_validated: false },
+    { ...bound, events: [null] }, { ...bound, state: "REFUSED" }]) {
+    assert.throws(() => validateEngineResponse(altered, input));
+}
 console.log("VS Code response behavior tests passed.");

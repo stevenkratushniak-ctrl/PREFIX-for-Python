@@ -2,7 +2,7 @@
 
 `PREFIX for Python` applies deterministic Python prefix correction inside VS Code on Windows x64 and Linux amd64.
 
-It does not autocomplete. It does not infer intent from the cloud. It sends Python text to the local `prefix-python` engine, applies a mapped `ALWAYS_SAFE` correction when one lawful continuation exists, and refuses when the state is ambiguous or unsupported.
+It does not autocomplete or infer intent from the cloud. It sends Python text to the local engine, applies bounded structural corrections, and refuses or advises without editing for unsupported/ambiguous cases. The internal `ALWAYS_SAFE` label is not a guarantee of intended behavior. Review edits before saving. A response for older document text is refused rather than overwriting newer typing. Editor commands do not create CLI file receipts; use CLI `--apply` for that workflow.
 
 The extension now reflects the Python lane model directly:
 
