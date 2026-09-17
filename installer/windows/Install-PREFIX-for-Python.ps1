@@ -113,7 +113,8 @@ try {
     if ($LASTEXITCODE -ne 0 -or $versionOutput -notmatch "0\.1\.0") {
         Stop-Install "the bundled engine version smoke check failed: $versionOutput"
     }
-    $smokeOutput = "if ready`nprint('launch')`n" | & $Python -m prefix_python --stdin --json 2>&1
+    # Use the hash-verified UTF-8 demo file; shell pipe encodings can prepend a BOM.
+    $smokeOutput = & $Python -m prefix_python (Join-Path $Assets "broken_missing_colon.txt") --json 2>&1
     if ($LASTEXITCODE -ne 0) { Stop-Install "the correction smoke check failed: $smokeOutput" }
     $smoke = $smokeOutput | ConvertFrom-Json
     if ($smoke.status -ne "ACCEPT_FIXED" -or $smoke.source -notmatch "if ready:") {
@@ -151,7 +152,9 @@ try {
     }
 
     $finalPython = Join-Path $InstallRoot "runtime\python.exe"
-    $finalSmoke = "if ready`nprint('restart proof')`n" | & $finalPython -m prefix_python --stdin --json 2>&1 | ConvertFrom-Json
+    $finalSmokeOutput = & $finalPython -m prefix_python (Join-Path $InstallRoot "assets\broken_missing_colon.txt") --json 2>&1
+    if ($LASTEXITCODE -ne 0) { Stop-Install "the installed-engine restart smoke check failed: $finalSmokeOutput" }
+    $finalSmoke = $finalSmokeOutput | ConvertFrom-Json
     if ($finalSmoke.status -ne "ACCEPT_FIXED") { Stop-Install "the installed-engine restart smoke check failed." }
     if (Test-Path -LiteralPath $BackupRoot) { Remove-Item -LiteralPath $BackupRoot -Recurse -Force }
 
