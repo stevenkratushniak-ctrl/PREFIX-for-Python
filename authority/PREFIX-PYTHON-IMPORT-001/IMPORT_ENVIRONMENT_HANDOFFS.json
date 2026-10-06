@@ -1,0 +1,10 @@
+{
+  "schema": "PREFIX-PY312-IMPORT-001",
+  "handoffs": [
+    "ENV-MODULE-ABSENT_IN_PINNED_ENV",
+    "ENV-MODULE-PRESENT_OTHER_PINNED_ENV",
+    "ENV-CUSTOM_FINDER_ACTIVE",
+    "ENV-PACKAGE_CONTEXT_MISSING"
+  ],
+  "installation_authority": false
+}
