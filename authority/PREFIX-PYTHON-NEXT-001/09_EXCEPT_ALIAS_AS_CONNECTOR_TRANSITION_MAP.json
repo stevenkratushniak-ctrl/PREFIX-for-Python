@@ -1,0 +1,35 @@
+{
+  "authority_id": "EXCEPT_ALIAS_AS_CONNECTOR_V2",
+  "rules": [
+    {
+      "state": "F1_MISSING_UNIQUE",
+      "continuations": 1,
+      "lane": "APPLY",
+      "action": "insert as"
+    },
+    {
+      "state": "F2_MISSING_MULTI",
+      "continuations": "2+",
+      "lane": "ADVISE",
+      "action": "no mutation"
+    },
+    {
+      "state": "F3_MISSING_ZERO",
+      "continuations": 0,
+      "lane": "ROADMAP",
+      "action": "no mutation"
+    },
+    {
+      "state": "F4_OTHER_SYNTAX",
+      "continuations": "authority_insufficient",
+      "lane": "ROADMAP",
+      "action": "no mutation"
+    },
+    {
+      "state": "F0_VALID",
+      "continuations": 0,
+      "lane": "APPLY",
+      "action": "ACCEPT_VALID unchanged"
+    }
+  ]
+}

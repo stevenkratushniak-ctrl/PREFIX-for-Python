@@ -1,0 +1,65 @@
+{
+  "authority_id": "EXCEPT_ALIAS_AS_CONNECTOR_V2",
+  "python": "3.12",
+  "mutation": {
+    "kind": "insert_token",
+    "token": "as",
+    "preserve_existing_nonwhitespace_tokens": true
+  },
+  "nodes": [
+    [
+      "F0",
+      "ADMISSIBLE"
+    ],
+    [
+      "F1",
+      "INADMISSIBLE"
+    ],
+    [
+      "F2",
+      "AMBIGUOUS"
+    ],
+    [
+      "F3",
+      "OUTSIDE_AUTHORITY"
+    ],
+    [
+      "F4",
+      "OUTSIDE_AUTHORITY"
+    ],
+    [
+      "F5",
+      "ADMISSIBLE"
+    ],
+    [
+      "F6",
+      "ADMISSIBLE"
+    ]
+  ],
+  "edges": [
+    {
+      "from": "F1",
+      "to": "F0",
+      "guard": "candidate_count == 1 && parse_reparse_valid && ast_authority_valid",
+      "lane": "APPLY"
+    },
+    {
+      "from": "F2",
+      "to": "F0",
+      "guard": "candidate_count > 1",
+      "lane": "ADVISE"
+    },
+    {
+      "from": "F3",
+      "to": "F3",
+      "guard": "candidate_count == 0",
+      "lane": "ROADMAP"
+    }
+  ],
+  "invariants": [
+    "valid source unchanged",
+    "lexical shadows untouched",
+    "idempotent",
+    "deterministic ordered enumeration"
+  ]
+}
