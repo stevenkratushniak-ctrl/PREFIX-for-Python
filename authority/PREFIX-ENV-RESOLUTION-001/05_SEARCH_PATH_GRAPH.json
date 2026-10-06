@@ -1,0 +1,41 @@
+{
+  "schema": "PREFIX-ENV-RESOLUTION-001",
+  "nodes": [
+    "environment",
+    "sys.path[]",
+    "cwd_if_relevant",
+    "project_root_if_supplied",
+    "package.__path__[]",
+    "path_hook",
+    "path_entry_finder",
+    "module_spec"
+  ],
+  "edges": [
+    [
+      "environment",
+      "sys.path[]"
+    ],
+    [
+      "sys.path[]",
+      "path_hook"
+    ],
+    [
+      "path_hook",
+      "path_entry_finder"
+    ],
+    [
+      "path_entry_finder",
+      "module_spec"
+    ],
+    [
+      "package.__path__[]",
+      "path_hook"
+    ],
+    [
+      "cwd_if_relevant",
+      "sys.path[]"
+    ]
+  ],
+  "order_significant": true,
+  "duplicates_preserved": true
+}
