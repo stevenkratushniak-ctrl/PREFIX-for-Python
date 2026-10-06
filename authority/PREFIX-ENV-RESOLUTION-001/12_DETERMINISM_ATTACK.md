@@ -1,0 +1,6 @@
+# Determinism Attack
+sys.path mutation -> snapshot instability or fingerprint change. Duplicate roots -> preserve order; not ambiguity if standard finder deterministically chooses first, but shadowing evidence is recorded. Local shadow -> origin changes resolution report. Editable installs -> path/distribution provenance may change; no install inference. Namespace packages -> record all observed portions and dynamic parent-path sensitivity. Zip imports -> classify path entry/loader, preserve origin. Custom meta finder/path hook -> narrowed/custom or outside.
+
+Package __path__ mutation -> package-context fingerprint/report changes. Venv/base -> prefixes/executable/path change fingerprint. Generated modules/sys.modules-only state -> cache can affect actual import; a pure find_spec-style report must explicitly state whether cache was included or bypassed and cannot claim execution equivalence. Built-in/frozen -> standard finder evidence. CWD/project-root changes -> fingerprint only when relevant search input changes. Import side effects/conditional behavior -> load unproven.
+
+Repeated canonical snapshots must hash identically. Any relevant ordered input change must change fingerprint/report. Irrelevant system changes are excluded by schema and therefore cannot change fingerprint.
