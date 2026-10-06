@@ -1,0 +1,42 @@
+name: PREFIX Commerce 002 qualification
+on:
+  push:
+    branches: [prefix-commerce-002-entitlement]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '20'}
+      - name: Seed isolated test entitlement
+        shell: bash
+        run: |
+          export PREFIX_ENTITLEMENT_ROOT="$RUNNER_TEMP/prefix-entitlement"
+          echo "PREFIX_ENTITLEMENT_ROOT=$PREFIX_ENTITLEMENT_ROOT" >> "$GITHUB_ENV"
+          python - <<'PY'
+          import os,time
+          from pathlib import Path
+          from prefix_python.entitlement import fp,write
+          r=Path(os.environ["PREFIX_ENTITLEMENT_ROOT"]);k="qualification-only-key"
+          write(r,{"schema":1,"policy_version":1,"instance_id":"qualification-instance","install_id":"qualification-install","license_fingerprint":fp(k),"store_id":11,"product_id":22,"variant_id":33,"last_validated_at":int(time.time())},k)
+          PY
+      - name: Python unit and regression suite
+        run: python -m unittest discover -s tests -q
+      - name: Unentitled source-safety proof
+        shell: bash
+        run: |
+          rm -rf "$PREFIX_ENTITLEMENT_ROOT"
+          python -m unittest tests.test_entitlement_gate.EntitlementGateTests.test_unentitled_apply_never_mutates -v
+      - name: VS Code build and behavior
+        working-directory: editor/vscode
+        run: |
+          npm ci
+          npm run build
+          npm run test:behavior
+          python package_vsix.py
