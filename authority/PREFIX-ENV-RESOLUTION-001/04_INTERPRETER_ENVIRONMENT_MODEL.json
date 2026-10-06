@@ -1,0 +1,22 @@
+{
+  "schema": "PREFIX-ENV-RESOLUTION-001",
+  "supported": {
+    "implementation": "CPython",
+    "python": "3.12.x"
+  },
+  "identity_fields": [
+    "implementation",
+    "version",
+    "executable",
+    "sys.prefix",
+    "sys.base_prefix",
+    "venv"
+  ],
+  "states": [
+    "ENV-INT-001",
+    "ENV-INT-002",
+    "ENV-INT-003",
+    "ENV-ID-001",
+    "ENV-ID-002"
+  ]
+}
