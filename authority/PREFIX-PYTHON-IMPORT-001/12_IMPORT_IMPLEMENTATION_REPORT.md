@@ -1,0 +1,4 @@
+# Import Implementation Report
+NOT IMPLEMENTED. This environment can write the isolated GitHub authority branch but cannot execute it as the pinned CPython 3.12 repository workspace. Unexecuted automatic mutation would violate PREFIX promotion law.
+
+Work order: implement a construct-scoped ImportFrom connector enumerator in the canonical engine; tokenize so comments/strings are never sites; enumerate literal import insertions only inside the governing statement; validate every successor; require exactly one ast.ImportFrom successor plus token-preservation; >1 -> ADVISE; zero -> ROADMAP; add stable rule/authority IDs and tests; preserve editor-neutral contract and V1 receipts/replay/rollback. No resolver-driven source rewriting.
