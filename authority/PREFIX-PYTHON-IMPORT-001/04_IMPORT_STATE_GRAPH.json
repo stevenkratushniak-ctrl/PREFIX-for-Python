@@ -1,0 +1,48 @@
+{
+  "schema": "PREFIX-PY312-IMPORT-001",
+  "layers": [
+    "grammar",
+    "ast_structure",
+    "module_resolution",
+    "symbol_evidence",
+    "binding",
+    "environment"
+  ],
+  "dynamic_boundaries": [
+    "sys.meta_path",
+    "sys.path_hooks",
+    "sys.path",
+    "package.__path__",
+    "namespace packages",
+    "custom __import__",
+    "loader execution",
+    "module __getattr__",
+    "runtime re-export"
+  ],
+  "edges": [
+    [
+      "source",
+      "grammar"
+    ],
+    [
+      "grammar",
+      "ast_structure"
+    ],
+    [
+      "ast_structure",
+      "module_resolution"
+    ],
+    [
+      "module_resolution",
+      "symbol_evidence"
+    ],
+    [
+      "symbol_evidence",
+      "binding"
+    ],
+    [
+      "module_resolution",
+      "environment"
+    ]
+  ]
+}
