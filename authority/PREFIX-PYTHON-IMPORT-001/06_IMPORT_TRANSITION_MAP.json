@@ -1,0 +1,32 @@
+{
+  "schema": "PREFIX-PY312-IMPORT-001",
+  "transitions": [
+    {
+      "id": "TR-IMP-001",
+      "from": "IMP-LEX-002",
+      "zero": "ROADMAP/REFUSE",
+      "one": "POTENTIAL_APPLY after AST+token proof",
+      "many": "ADVISE"
+    },
+    {
+      "id": "TR-IMP-002",
+      "from": "IMP-MOD-002",
+      "result": "ANALYZE + environment handoff"
+    },
+    {
+      "id": "TR-IMP-003",
+      "from": "IMP-SYM-002",
+      "result": "ANALYZE; no rename authority"
+    },
+    {
+      "id": "TR-IMP-004",
+      "from": "IMP-BIND-003",
+      "result": "ANALYZE/ADVISE only"
+    },
+    {
+      "id": "TR-IMP-005",
+      "from": "IMP-REL-003",
+      "result": "ANALYZE/REFUSE"
+    }
+  ]
+}
