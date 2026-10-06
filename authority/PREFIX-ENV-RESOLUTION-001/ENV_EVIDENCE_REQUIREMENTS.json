@@ -1,0 +1,23 @@
+{
+  "schema": "PREFIX-ENV-RESOLUTION-001",
+  "ABSENT_IN_PINNED_ENVIRONMENT": [
+    "supported pinned interpreter",
+    "stable fingerprint",
+    "standard/classified relevant finders/hooks",
+    "complete relevant package context",
+    "no spec"
+  ],
+  "RESOLVED_BY_CUSTOM_FINDER": [
+    "custom finder classifier",
+    "returned spec evidence"
+  ],
+  "PACKAGE_CONTEXT_REQUIRED": [
+    "requested relative/submodule target",
+    "missing parent package identity/path"
+  ],
+  "OUTSIDE": [
+    "unstable snapshot",
+    "unclassifiable relevant finder/hook",
+    "unsupported interpreter"
+  ]
+}
