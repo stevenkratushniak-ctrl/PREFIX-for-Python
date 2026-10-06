@@ -1,0 +1,57 @@
+name: PREFIX-EDITOR-002 JetBrains Proof
+on:
+  push:
+    branches: [prefix-editor-002-jetbrains-proof]
+    paths:
+      - 'editor/jetbrains/**'
+      - '.github/workflows/prefix-editor-002-jetbrains-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.2.1'
+      - name: Environment
+        run: |
+          java -version
+          python --version
+          gradle --version
+      - name: Isolated adapter tests
+        working-directory: editor/jetbrains
+        env:
+          PREFIX_PYTHON_ENGINE: python
+          PYTHONPATH: ${{ github.workspace }}
+        run: gradle --no-daemon test
+      - name: Build plugin artifact
+        working-directory: editor/jetbrains
+        run: gradle --no-daemon buildPlugin verifyPluginProjectConfiguration
+      - name: JetBrains Plugin Verifier
+        working-directory: editor/jetbrains
+        run: gradle --no-daemon verifyPlugin
+      - name: Prove protected source untouched
+        run: |
+          git diff 33b61e9059c06d295aff9eb62bf4b4feb1dc3d56 -- prefix_python editor/vscode
+          test -z "$(git diff --name-only 33b61e9059c06d295aff9eb62bf4b4feb1dc3d56 -- prefix_python editor/vscode)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: prefix-editor-002-linux-proof
+          path: |
+            editor/jetbrains/build/distributions/*.zip
+            editor/jetbrains/build/reports/**
+            editor/jetbrains/build/test-results/**
