@@ -1,0 +1,31 @@
+{
+  "schema": "PREFIX-PY312-IMPORT-001",
+  "grammar": [
+    "Python 3.12 tokenizer/parser",
+    "PREFIX AST authority"
+  ],
+  "module_resolution": [
+    "pinned interpreter",
+    "sys.path snapshot",
+    "finder classification",
+    "parent package __path__ when applicable"
+  ],
+  "relative": [
+    "pinned package context"
+  ],
+  "symbol": [
+    "inspectable source AST",
+    "dynamic-export risk classification"
+  ],
+  "environment": [
+    "environment identity",
+    "path fingerprint",
+    "finder fingerprint"
+  ],
+  "insufficient_if": [
+    "unmodeled custom finder",
+    "runtime-generated export",
+    "environment unpinned",
+    "claim requires module execution"
+  ]
+}
