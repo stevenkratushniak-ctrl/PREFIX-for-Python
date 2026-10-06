@@ -1,0 +1,6 @@
+# Import Reverse Taxonomy
+IMP-LEX-002 complements grammar-valid ImportFrom states produced by inserting exactly one literal import at the unique bounded gap while preserving existing non-whitespace tokens. Removing it recreates the mapped invalid state.
+
+IMP-LEX-003/004 expose plurality: as/comma/target edits can create different valid programs. IMP-MOD-002 complements environment construction, path changes, custom finders, source-target changes or project modules; these are not equivalent source fixes. IMP-SYM-002 complements export creation/re-export, requested-name changes or dynamic supply. IMP-BIND-003 complements aliasing/renaming either side or intentional shadowing. IMP-REL-002/003 complements execution-context, level, absolute-target or package-structure changes.
+
+Admissible imports become inadmissible by corrupting mandatory grammar, dotted names/lists, relative context, environment resolution, export state or bindings. These transformations remain separate authority layers; plurality is never collapsed.
