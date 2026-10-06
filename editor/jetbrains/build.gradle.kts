@@ -34,7 +34,7 @@ intellijPlatform {
     buildSearchableOptions = false
     pluginConfiguration {
         id = "com.fastindustries.prefix.python.jetbrains"
-        name = "PREFIX for Python — JetBrains Proof"
+        name = "PREFIX for Python Proof"
         version = project.version.toString()
         ideaVersion {
             sinceBuild = "262.8665.309"
