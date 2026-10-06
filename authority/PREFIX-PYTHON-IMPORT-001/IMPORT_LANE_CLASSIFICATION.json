@@ -1,0 +1,26 @@
+{
+  "schema": "PREFIX-PY312-IMPORT-001",
+  "APPLY_CANDIDATE": [
+    "IMP-LEX-002"
+  ],
+  "ADVISE": [
+    "IMP-LEX-003",
+    "IMP-LEX-004",
+    "IMP-MOD-003",
+    "IMP-ENV-002"
+  ],
+  "ANALYZE": [
+    "IMP-MOD-002",
+    "IMP-SYM-002",
+    "IMP-BIND-003",
+    "IMP-REL-002",
+    "IMP-REL-003",
+    "IMP-ENV-001"
+  ],
+  "REFUSE_OR_OUTSIDE": [
+    "IMP-MOD-004",
+    "IMP-SYM-003",
+    "IMP-ENV-003"
+  ],
+  "rule": "APPLY requires exactly one bounded successor plus AST/token proof; environment evidence never grants source-intent authority"
+}
