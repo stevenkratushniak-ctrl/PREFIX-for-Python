@@ -1,0 +1,4 @@
+# Next Recommended Expansion
+After the two V2 connectors are implemented and qualified, investigate non-mutating ANALYZE expansion before more APPLY rules: (1) call argument-order violations; (2) duplicate keyword arguments; (3) parameter default-order violations; (4) indentation/dedent diagnostics with explicit block-context evidence.
+
+For a later APPLY search, inspect mandatory punctuation/connectors only under the same token-preserving, candidate-cardinality law. Do not promote import/with aliasing, comma insertion, string closure, name correction, or semantic operator replacement without a new narrower proof boundary.
