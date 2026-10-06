@@ -28,6 +28,8 @@ jobs:
           PY
       - name: Python unit and regression suite
         run: python -m unittest discover -s tests -q
+      - name: Install VS Code build dependencies for portable qualification
+        run: npm ci --prefix editor/vscode
       - name: Existing portable release qualification
         run: python qualification/run_release_qualification.py --python python
       - name: Unentitled source-safety proof
@@ -66,6 +68,8 @@ jobs:
           '@ | python -
       - name: Python unit and regression suite
         run: python -m unittest discover -s tests -q
+      - name: Install VS Code build dependencies for portable qualification
+        run: npm ci --prefix editor/vscode
       - name: Existing portable release qualification
         run: python qualification/run_release_qualification.py --python python
       - name: VS Code build and behavior
