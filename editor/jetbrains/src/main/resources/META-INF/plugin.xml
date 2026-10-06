@@ -1,0 +1,18 @@
+<idea-plugin>
+  <id>com.fastindustries.prefix.python.jetbrains</id>
+  <name>PREFIX for Python — JetBrains Proof</name>
+  <vendor>Fast Industries</vendor>
+  <depends>com.intellij.modules.platform</depends>
+  <depends>PythonCore</depends>
+  <extensions defaultExtensionNs="com.intellij">
+    <enterHandlerDelegate implementation="com.fastindustries.prefix.jetbrains.PrefixEnterDelegate"/>
+  </extensions>
+  <actions>
+    <action id="PrefixPython.GovernDocument"
+            class="com.fastindustries.prefix.jetbrains.GovernDocumentAction"
+            text="PREFIX: Govern Active Python Transition"/>
+    <action id="PrefixPython.GovernSelection"
+            class="com.fastindustries.prefix.jetbrains.GovernSelectionAction"
+            text="PREFIX: Govern Selected Python Structure"/>
+  </actions>
+</idea-plugin>
