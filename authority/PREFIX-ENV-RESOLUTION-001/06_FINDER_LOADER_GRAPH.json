@@ -1,0 +1,20 @@
+{
+  "schema": "PREFIX-ENV-RESOLUTION-001",
+  "standard_meta_finders": [
+    "BuiltinImporter",
+    "FrozenImporter",
+    "PathFinder"
+  ],
+  "flow": [
+    "sys.modules cache (actual import only)",
+    "ordered sys.meta_path",
+    "ModuleSpec",
+    "Loader",
+    "module execution"
+  ],
+  "claims": {
+    "find_spec": "discovery evidence only",
+    "loader": "execution authority not exercised",
+    "custom": "classify or refuse/narrow"
+  }
+}
