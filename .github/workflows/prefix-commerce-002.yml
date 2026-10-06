@@ -28,6 +28,8 @@ jobs:
           PY
       - name: Python unit and regression suite
         run: python -m unittest discover -s tests -q
+      - name: Existing portable release qualification
+        run: python qualification/run_release_qualification.py --python python
       - name: Unentitled source-safety proof
         shell: bash
         run: |
@@ -64,6 +66,8 @@ jobs:
           '@ | python -
       - name: Python unit and regression suite
         run: python -m unittest discover -s tests -q
+      - name: Existing portable release qualification
+        run: python qualification/run_release_qualification.py --python python
       - name: VS Code build and behavior
         working-directory: editor/vscode
         run: |
