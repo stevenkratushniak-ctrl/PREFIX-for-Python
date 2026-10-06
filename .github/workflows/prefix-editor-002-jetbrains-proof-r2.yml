@@ -1,7 +1,7 @@
 name: PREFIX-EDITOR-002 JetBrains Proof R2
 on:
   push:
-    branches: [prefix-editor-002-jetbrains-proof]
+    branches: [prefix-editor-002-jetbrains-proof, prefix-editor-002-jetbrains-proof-r2]
     paths:
       - 'editor/jetbrains/**'
       - '.github/workflows/prefix-editor-002-jetbrains-proof.yml'
