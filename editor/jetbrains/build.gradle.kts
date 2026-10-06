@@ -23,7 +23,7 @@ dependencies {
         testFramework(TestFrameworkType.Platform)
         pluginVerifier()
     }
-    testImplementation(kotlin("test"))
+    testImplementation(kotlin("test"))\n    testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
 }
 
 kotlin {
