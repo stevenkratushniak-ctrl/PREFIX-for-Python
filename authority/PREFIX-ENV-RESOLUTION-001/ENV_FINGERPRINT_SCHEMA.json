@@ -1,0 +1,27 @@
+{
+  "schema": "PREFIX-ENV-FP-001",
+  "hash": "sha256(canonical_json_utf8)",
+  "include": [
+    "implementation",
+    "python_version",
+    "executable",
+    "sys.prefix",
+    "sys.base_prefix",
+    "venv",
+    "ordered_meta_path_classifiers",
+    "ordered_sys_path",
+    "ordered_path_hook_classifiers",
+    "project_root_if_operation_relevant",
+    "package_context_if_relevant",
+    "package_path_if_relevant",
+    "cwd_if_empty_path_relevant"
+  ],
+  "exclude": [
+    "hardware",
+    "hostname",
+    "unrelated_env_vars",
+    "unrelated_files",
+    "installed_apps",
+    "network_state"
+  ]
+}
