@@ -1,0 +1,14 @@
+{
+  "schema": "PREFIX-ENV-RESOLUTION-001",
+  "states": [
+    "UNSUPPORTED_ENVIRONMENT",
+    "AUTHORITY_INSUFFICIENT",
+    "UNSTABLE_SNAPSHOT",
+    "UNCLASSIFIABLE_CUSTOM_FINDER",
+    "UNCLASSIFIABLE_PATH_HOOK",
+    "PACKAGE_CONTEXT_REQUIRED",
+    "LOAD_UNPROVEN"
+  ],
+  "mutation": false,
+  "installation": false
+}
