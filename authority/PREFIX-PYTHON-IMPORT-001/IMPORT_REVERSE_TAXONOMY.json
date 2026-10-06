@@ -1,0 +1,54 @@
+{
+  "schema": "PREFIX-PY312-IMPORT-001",
+  "complements": [
+    {
+      "id": "REV-IMP-LEX-002",
+      "invalid": "IMP-LEX-002",
+      "admissible_successors": "insert literal import; cardinality governed",
+      "plurality": "0/1/N explicitly retained"
+    },
+    {
+      "id": "REV-IMP-MOD-002",
+      "invalid": "IMP-MOD-002",
+      "admissible_successors": [
+        "environment gains module",
+        "search authority changes",
+        "custom finder supplies module",
+        "source target changes"
+      ],
+      "source_apply": false
+    },
+    {
+      "id": "REV-IMP-SYM-002",
+      "invalid": "IMP-SYM-002",
+      "admissible_successors": [
+        "module exports name",
+        "module re-exports name",
+        "requested name changes",
+        "dynamic export supplies name"
+      ],
+      "source_apply": false
+    },
+    {
+      "id": "REV-IMP-BIND-003",
+      "invalid": "IMP-BIND-003",
+      "admissible_successors": [
+        "alias import",
+        "rename other binding",
+        "retain intentional shadowing"
+      ],
+      "source_apply": false
+    },
+    {
+      "id": "REV-IMP-REL-003",
+      "invalid": "IMP-REL-003",
+      "admissible_successors": [
+        "execution context changes",
+        "relative level changes",
+        "absolute target used",
+        "package structure changes"
+      ],
+      "source_apply": false
+    }
+  ]
+}
