@@ -76,6 +76,46 @@ export function activate(context: vscode.ExtensionContext) {
         output.show(true);
     });
 
+    const licenseStatus = vscode.commands.registerCommand("prefixPython.licenseStatus", async () => {
+        const result = await runLicenseCommand(["status"], output);
+        if (result) void vscode.window.showInformationMessage(`PREFIX license: ${result.state}. ${result.message}`);
+    });
+
+    const activateLicense = vscode.commands.registerCommand("prefixPython.activateLicense", async () => {
+        const key = await vscode.window.showInputBox({
+            title: "Activate PREFIX — $29 once",
+            prompt: "Paste the PREFIX license key from your purchase",
+            password: true,
+            ignoreFocusOut: true,
+        });
+        if (!key) return;
+        const result = await runLicenseCommand(["activate", key], output);
+        if (!result) return;
+        if (result.entitled) {
+            setStatus(statusItem, "ready", "PREFIX activated");
+            void vscode.window.showInformationMessage("PREFIX is activated. Keep coding.");
+        } else {
+            setStatus(statusItem, "refused", "Activation required");
+            void vscode.window.showWarningMessage(`PREFIX activation: ${result.message}`);
+        }
+    });
+
+    const deactivateLicense = vscode.commands.registerCommand("prefixPython.deactivateLicense", async () => {
+        const answer = await vscode.window.showWarningMessage("Deactivate PREFIX on this installation?", { modal: true }, "Deactivate");
+        if (answer !== "Deactivate") return;
+        const result = await runLicenseCommand(["deactivate"], output);
+        if (result) void vscode.window.showInformationMessage(result.message);
+    });
+
+    const buyPrefix = vscode.commands.registerCommand("prefixPython.buyPrefix", async () => {
+        const purchaseUrl = vscode.workspace.getConfiguration("prefixPython").get<string>("purchaseUrl", "").trim();
+        if (!purchaseUrl) {
+            void vscode.window.showWarningMessage("PREFIX purchase URL is not configured in this pre-publication build.");
+            return;
+        }
+        await vscode.env.openExternal(vscode.Uri.parse(purchaseUrl));
+    });
+
     const onDidChange = vscode.workspace.onDidChangeTextDocument(async (event) => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
@@ -112,7 +152,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(output, statusItem, correctDocument, correctSelection, showGovernanceSurface, onDidChange);
+    context.subscriptions.push(output, statusItem, correctDocument, correctSelection, showGovernanceSurface, licenseStatus, activateLicense, deactivateLicense, buyPrefix, onDidChange);
 
     const api: PrefixExtensionApi = {
         getLastEngineError: () => extensionState.lastEngineError,
@@ -467,4 +507,24 @@ function setStatus(
                 : "PREFIX for Python\nNo lawful deterministic continuation was available.";
             return;
     }
+}
+
+
+type LicenseStatus = { state: string; entitled: boolean; message: string };
+
+async function runLicenseCommand(args: string[], output: vscode.OutputChannel): Promise<LicenseStatus | null> {
+    const invocation = resolvePythonInvocation(vscode.workspace.getConfiguration("prefixPython").get<string>("pythonCommand", ""));
+    return new Promise((resolve) => {
+        const child = spawn(invocation.command, [...invocation.prefixArgs, "-m", "prefix_python", "license", ...args, "--json"], { shell: false });
+        let stdout = ""; let stderr = "";
+        child.stdout.on("data", (chunk) => stdout += chunk.toString());
+        child.stderr.on("data", (chunk) => stderr += chunk.toString());
+        child.on("error", (error) => { output.appendLine(`PREFIX licensing could not start: ${error.message}`); resolve(null); });
+        child.on("close", () => {
+            if (stderr.trim()) output.appendLine(stderr.trim());
+            try { resolve(JSON.parse(stdout) as LicenseStatus); }
+            catch { output.appendLine("PREFIX licensing returned an unreadable response."); resolve(null); }
+        });
+        child.stdin.end();
+    });
 }
