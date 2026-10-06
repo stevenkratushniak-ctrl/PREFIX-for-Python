@@ -71,7 +71,7 @@ def main() -> int:
     output = args.output or WORK / f"{environment['platform']}-{environment['machine']}.json"
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(json.dumps({"output": str(output), "passed": report["passed"], "checks": len(checks)}, sort_keys=True))
+    print(json.dumps({"output": str(output), "passed": report["passed"], "checks": len(checks), "failures": failures}, sort_keys=True))
     return 0 if report["passed"] else 1
 
 
