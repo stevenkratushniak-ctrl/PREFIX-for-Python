@@ -1,4 +1,4 @@
-name: PREFIX-EDITOR-002 JetBrains Proof Final
+name: PREFIX-EDITOR-002 JetBrains Proof Final 2
 on:
   push:
     branches: [prefix-editor-002-jetbrains-proof, prefix-editor-002-jetbrains-proof-r2]
