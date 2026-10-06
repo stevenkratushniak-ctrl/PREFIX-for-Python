@@ -1,5 +1,4 @@
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -20,7 +19,6 @@ dependencies {
     intellijPlatform {
         pycharm("2026.2")
         bundledPlugin("PythonCore")
-        testFramework(TestFrameworkType.Platform)
         pluginVerifier()
     }
     testImplementation(kotlin("test"))
