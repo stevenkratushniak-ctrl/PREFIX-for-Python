@@ -40,8 +40,10 @@ def main() -> int:
 
     def run(command, *, input_text=None, expected=0, environment=env):
         result = subprocess.run([str(x) for x in command], cwd=out, env=environment,
-                                input=input_text, text=True, encoding="utf-8", errors="replace",
+                                input=None if input_text is None else input_text.encode("utf-8"),
                                 capture_output=True, timeout=240)
+        result.stdout = result.stdout.decode("utf-8", errors="replace")
+        result.stderr = result.stderr.decode("utf-8", errors="replace")
         report["steps"].append({"command": [str(x) for x in command], "exit_code": result.returncode,
                                 "stdout": result.stdout, "stderr": result.stderr})
         if result.returncode != expected:

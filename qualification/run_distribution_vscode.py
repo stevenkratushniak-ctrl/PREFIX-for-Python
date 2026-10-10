@@ -95,13 +95,18 @@ def main():
         if os.name=="nt":
             cli_candidates=[code.parent/"resources"/"app"/"out"/"cli.js"]
             launcher=code.parent/"bin"/"code.cmd"
+            cli_flags=[]
             if launcher.is_file():
-                match=re.search(r'"%~dp0\.\.\\([^"\r\n]*cli\.js)"',launcher.read_text(encoding="utf-8"))
+                launcher_text=launcher.read_text(encoding="utf-8")
+                match=re.search(r'"%~dp0\.\.\\([^"\r\n]*cli\.js)"',launcher_text)
                 if match: cli_candidates.insert(0,code.parent/Path(match.group(1)))
+                if "--ms-enable-electron-run-as-node" in launcher_text:
+                    cli_flags.append("--ms-enable-electron-run-as-node")
+                report["code_cli_launcher"]={"path":str(launcher),"sha256":digest(launcher),"flags":cli_flags}
             cli=next((candidate for candidate in cli_candidates if candidate.is_file()),None)
             if cli is None: raise RuntimeError("installed Code CLI entry point is missing")
-            cli_env=dict(env); cli_env["ELECTRON_RUN_AS_NODE"]="1"
-            step=execute([code,cli,*install_args],cli_env,out)
+            cli_env=dict(env); cli_env["ELECTRON_RUN_AS_NODE"]="1"; cli_env.pop("VSCODE_DEV",None)
+            step=execute([code,cli,*cli_flags,*install_args],cli_env,out)
         else:
             cli=code.parent/"resources"/"app"/"out"/"cli.js"
             if not cli.is_file(): raise RuntimeError("Linux Code CLI entry point is missing")

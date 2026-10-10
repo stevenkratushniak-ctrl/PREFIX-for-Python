@@ -32,7 +32,8 @@ def main():
     args = parser.parse_args()
     assert os.environ.get("GITHUB_REPOSITORY") == REPOSITORY
     assert os.environ.get("GITHUB_REF") == "refs/heads/codex/prefix-distribution-001"
-    assert all(c.isalnum() or c in "-_" for c in args.kind)
+    assert all(c.isalnum() or c in "-_." for c in args.kind)
+    assert ".." not in args.kind and not args.kind.startswith(".")
     run, attempt = os.environ["GITHUB_RUN_ID"], os.environ["GITHUB_RUN_ATTEMPT"]
     view = gh("release", "view", TAG, "--json", "isDraft,name,targetCommitish", check=False)
     if view.returncode:

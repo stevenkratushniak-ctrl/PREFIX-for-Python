@@ -29,8 +29,12 @@ class PyCharmEditorInteractionTest : BasePlatformTestCase() {
 
     override fun tearDown() {
         try {
-            FileEditorManager.getInstance(project).closeAllFiles()
-            Files.deleteIfExists(testPath)
+            if (::testPath.isInitialized) {
+                LocalFileSystem.getInstance().findFileByNioFile(testPath)?.let {
+                    FileEditorManager.getInstance(project).closeFile(it)
+                }
+                Files.deleteIfExists(testPath)
+            }
         } finally { super.tearDown() }
     }
 
