@@ -2,6 +2,19 @@ name: PREFIX distribution candidate build and qualification
 on:
   push:
     branches: [codex/prefix-distribution-001]
+    paths:
+      - "prefix_python/**"
+      - "editor/vscode/**"
+      - "installer/**"
+      - "tests/**"
+      - "tools/run_distribution_tests.py"
+      - "qualification/build_distribution_candidate.py"
+      - "qualification/run_distribution_installation.py"
+      - "qualification/run_distribution_vscode.py"
+      - "qualification/verify_distribution_vsix.py"
+      - "qualification/store_distribution_build.py"
+      - "pyproject.toml"
+      - ".github/workflows/prefix-distribution-001.yml"
   workflow_dispatch:
 permissions:
   contents: write

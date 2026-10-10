@@ -9,6 +9,12 @@
     <notificationGroup id="PREFIX for Python" displayType="BALLOON"/>
   </extensions>
   <actions>
+    <action id="PrefixPython.GovernDocument"
+            class="com.fastindustries.prefix.jetbrains.GovernDocumentAction"
+            text="PREFIX: Govern Active Python Transition"/>
+    <action id="PrefixPython.GovernSelection"
+            class="com.fastindustries.prefix.jetbrains.GovernSelectionAction"
+            text="PREFIX: Govern Selected Python Structure"/>
     <group id="PrefixPython.Menu" text="PREFIX for Python" popup="true">
       <add-to-group group-id="ToolsMenu" anchor="last"/>
       <reference ref="PrefixPython.GovernDocument"/>
@@ -20,11 +26,5 @@
       <action id="PrefixPython.DeactivateLicense" class="com.fastindustries.prefix.jetbrains.DeactivateLicenseAction" text="Deactivate This Installation"/>
       <action id="PrefixPython.BuyPrefix" class="com.fastindustries.prefix.jetbrains.BuyPrefixAction" text="Purchase PREFIX"/>
     </group>
-    <action id="PrefixPython.GovernDocument"
-            class="com.fastindustries.prefix.jetbrains.GovernDocumentAction"
-            text="PREFIX: Govern Active Python Transition"/>
-    <action id="PrefixPython.GovernSelection"
-            class="com.fastindustries.prefix.jetbrains.GovernSelectionAction"
-            text="PREFIX: Govern Selected Python Structure"/>
   </actions>
 </idea-plugin>
