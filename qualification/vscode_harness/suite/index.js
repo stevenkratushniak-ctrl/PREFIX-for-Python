@@ -2,44 +2,98 @@
 
 const assert = require("node:assert/strict");
 const vscode = require("vscode");
+const { execFileSync } = require("node:child_process");
+const path = require("node:path");
+const fs = require("node:fs");
 
 const EXTENSION_ID = "fastindustries.prefix-python";
 
 async function run() {
+    const cases = [];
+    async function check(name, operation) {
+        await operation();
+        cases.push({ name, passed: true });
+    }
     const extension = vscode.extensions.getExtension(EXTENSION_ID);
     assert.ok(extension, `${EXTENSION_ID} is not installed`);
     const api = await extension.activate();
     assert.ok(api, "PREFIX extension did not expose its qualification API");
     const commands = new Set(await vscode.commands.getCommands(true));
-    for (const command of [
+    await check("commands_and_purchase_route", async () => { for (const command of [
         "prefixPython.correctDocument",
         "prefixPython.correctSelection",
         "prefixPython.showGovernanceSurface",
+        "prefixPython.licenseStatus",
+        "prefixPython.activateLicense",
+        "prefixPython.deactivateLicense",
+        "prefixPython.buyPrefix",
     ]) {
         assert.ok(commands.has(command), `missing command: ${command}`);
     }
+    assert.equal(extension.packageJSON.contributes.configuration.properties["prefixPython.purchaseUrl"].default,
+        "https://fastlaunch.lemonsqueezy.com/checkout/buy/37f6bf48-4f0d-4151-a076-8b60f030e985");
+    });
 
     const configuration = vscode.workspace.getConfiguration("prefixPython");
     await configuration.update("pythonCommand", "", vscode.ConfigurationTarget.Global);
     await configuration.update("enableOnEnter", true, vscode.ConfigurationTarget.Global);
     const invocation = api.getResolvedInvocation();
-    assert.equal(invocation.source, "installed");
+    await check("installed_runtime_discovery", async () => assert.equal(invocation.source, "installed"));
 
-    await testDocumentCorrection(api);
-    await testSelectionCorrection(api);
-    await testAdviceWithoutMutation(api);
-    await testRefusalWithoutMutation(api);
-    await testEnterCorrection(api);
-    await testInvalidInterpreter(api, configuration);
-    await testWrongInterpreter(api, configuration);
-    await testTimeout(api, configuration);
+    for (const [fixture,expected] of [["unactivated","UNACTIVATED"],["invalid","CACHE_INVALID"],["expired","CACHE_EXPIRED"]]) {
+        await check(`entitlement_denial_${fixture}`, async () => {
+            configureFixture(invocation, fixture);
+            const status=await vscode.commands.executeCommand("prefixPython.licenseStatus");
+            assert.equal(status.state,expected);
+            assert.equal(status.entitled,false);
+            const source="if ready\nprint('launch')\n";
+            const editor=await showPython(source);
+            await vscode.commands.executeCommand("prefixPython.correctDocument");
+            assert.equal(editor.document.getText(),source);
+            const outcome=api.getLastOutcome();
+            assert.ok(outcome, api.getLastEngineError());
+            assert.equal(outcome.refusal_code,"entitlement_required");
+            assert.equal(outcome.mutation_performed,false);
+            assert.equal(outcome.source,source);
+        });
+    }
+    await check("synthetic_activation_cached_status", async () => {
+        configureFixture(invocation,"active");
+        const status=await vscode.commands.executeCommand("prefixPython.licenseStatus");
+        assert.equal(status.state,"ACTIVE_CACHED");
+        assert.equal(status.entitled,true);
+    });
+    await check("document_correction",()=>testDocumentCorrection(api));
+    await check("selection_correction",()=>testSelectionCorrection(api));
+    await check("advice_without_mutation",()=>testAdviceWithoutMutation(api));
+    await check("structural_refusal_without_mutation",()=>testRefusalWithoutMutation(api));
+    await check("enter_correction",()=>testEnterCorrection(api));
+    await check("literal_preservation",()=>testPreservesLiteralData(api));
+    await check("concurrent_typing_preserved",()=>testConcurrentTyping(api, configuration));
+    await check("missing_interpreter",()=>testInvalidInterpreter(api, configuration));
+    await check("wrong_interpreter",()=>testWrongInterpreter(api, configuration));
+    await check("engine_timeout",()=>testTimeout(api, configuration));
     await configuration.update("pythonCommand", "", vscode.ConfigurationTarget.Global);
 
-    process.stdout.write(`PREFIX_VSCODE_HOST_PROOF_OK ${JSON.stringify({
+    const proof={
         extension: EXTENSION_ID,
         invocation,
         vscode: vscode.version,
-    })}\n`);
+        cases,
+        synthetic_entitlement_only:true,
+        live_activation_verified:false,
+        interactive_password_input_verified:false,
+        passed:cases.length===16 && cases.every(test=>test.passed)
+    };
+    if (process.env.PREFIX_HOST_CASE_REPORT) fs.writeFileSync(process.env.PREFIX_HOST_CASE_REPORT,JSON.stringify(proof,null,2)+"\n");
+    process.stdout.write(`PREFIX_VSCODE_HOST_PROOF_OK ${JSON.stringify(proof)}\n`);
+}
+
+function configureFixture(invocation, scenario) {
+    assert.ok(process.env.PREFIX_ENTITLEMENT_ROOT,"isolated entitlement root is required");
+    const raw=execFileSync(invocation.command,[...invocation.prefixArgs,path.join(__dirname,"..","entitlement_fixture.py"),scenario],{encoding:"utf8"});
+    const fixture=JSON.parse(raw);
+    assert.equal(fixture.synthetic,true);
 }
 
 async function testDocumentCorrection(api) {
@@ -97,6 +151,31 @@ async function testInvalidInterpreter(api, configuration) {
     await vscode.commands.executeCommand("prefixPython.correctDocument");
     assert.match(api.getLastEngineError(), /could not start its CPython 3\.12 engine/i);
     assert.equal(api.getLastOutcome(), null);
+}
+
+async function testPreservesLiteralData(api) {
+    const source = 'value = "a\tb"\n';
+    const editor = await showPython(source);
+    await vscode.commands.executeCommand("prefixPython.correctDocument");
+    assert.equal(editor.document.getText(), source);
+    assert.equal(api.getLastOutcome().status, "ACCEPT_VALID");
+}
+
+async function testConcurrentTyping(api, configuration) {
+    await configuration.update("enableOnEnter", false, vscode.ConfigurationTarget.Global);
+    const source = "if True\n    print('x')\n" + "value = 1\n".repeat(4000);
+    const editor = await showPython(source);
+    const pending = vscode.commands.executeCommand("prefixPython.correctDocument");
+    // The real command has spawned the real packaged engine; change the document
+    // before its asynchronous result returns. No replacement engine is used.
+    await new Promise(resolve => setTimeout(resolve, 20));
+    const marker = "# newer customer typing\n";
+    assert.equal(await editor.edit(builder => builder.insert(new vscode.Position(0, 0), marker)), true);
+    await pending;
+    assert.equal(editor.document.getText(), marker + source);
+    assert.match(api.getLastEngineError(), /document_changed/);
+    assert.equal(api.getLastOutcome(), null);
+    await configuration.update("enableOnEnter", true, vscode.ConfigurationTarget.Global);
 }
 
 async function testWrongInterpreter(api, configuration) {

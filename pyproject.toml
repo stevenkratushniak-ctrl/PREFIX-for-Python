@@ -24,7 +24,14 @@ classifiers = [
 
 [project.scripts]
 prefix-python = "prefix_python.cli:main"
-prefix-python-ops = "prefix_python.operator_console:main"
+prefix-python-ops = "prefix_python.commercial_operator_console:main"
+
+[project.urls]
+Homepage = "https://fast-industries-prefix.steven-k-ratushniak.chatgpt.site/prefix/"
+Documentation = "https://fast-industries-prefix.steven-k-ratushniak.chatgpt.site/prefix/install/"
+Repository = "https://github.com/stevenkratushniak-ctrl/PREFIX-for-Python"
+Issues = "https://github.com/stevenkratushniak-ctrl/PREFIX-for-Python/issues"
+Purchase = "https://fastlaunch.lemonsqueezy.com/checkout/buy/37f6bf48-4f0d-4151-a076-8b60f030e985"
 
 [tool.setuptools]
 packages = ["prefix_python"]

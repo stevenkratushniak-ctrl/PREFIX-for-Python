@@ -1,0 +1,91 @@
+name: PREFIX Distribution 001 JetBrains candidate qualification
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/prefix-distribution-001
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: JetBrains candidate on ${{ matrix.os }}
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    env:
+      PREFIX_PYTHON_ENGINE: python
+      PYTHONPATH: ${{ github.workspace }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: ''
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.2.1'
+          cache-disabled: true
+      - name: Record runtime and candidate source identity
+        run: |
+          mkdir -p qualification/jetbrains-distribution-evidence
+          {
+            git rev-parse HEAD 'HEAD^{tree}'
+            java -version
+            python --version
+            gradle --version
+            uname -a
+            echo 'PyCharm editor model fixtures are headless. Rendered native GUI interaction is NOT_RUN.'
+            echo 'No production purchase, license activation, marketplace submission or publication is performed.'
+          } > qualification/jetbrains-distribution-evidence/environment.txt 2>&1
+      - name: Adapter contracts, commercial transport and actual PyCharm editor model
+        working-directory: editor/jetbrains
+        run: gradle --no-daemon --console=plain test
+      - name: Build final plugin and verify project configuration
+        if: always()
+        working-directory: editor/jetbrains
+        run: gradle --no-daemon --console=plain buildPlugin verifyPluginProjectConfiguration
+      - name: Plugin Verifier on final candidate artifact
+        if: always()
+        working-directory: editor/jetbrains
+        run: gradle --no-daemon --console=plain verifyPlugin
+      - name: Record final candidate artifact identities
+        if: always()
+        run: |
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('editor/jetbrains/build')
+          artifacts=[]
+          for folder,glob in [('distributions','*.zip'),('libs','*.jar')]:
+              for p in sorted((root/folder).glob(glob)):
+                  artifacts.append({'path':str(p),'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()})
+          pathlib.Path('qualification/jetbrains-distribution-evidence/artifact-identities.json').write_text(json.dumps(artifacts,indent=2)+'\n')
+          PY
+      - name: Store qualification evidence in the existing unpublished technical draft
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python qualification/store_distribution_build.py
+          --kind jetbrains-${{ matrix.os }}
+          --paths qualification/jetbrains-distribution-evidence
+          editor/jetbrains/build/distributions editor/jetbrains/build/libs
+          editor/jetbrains/build/reports/tests editor/jetbrains/build/reports/pluginVerifier
+          editor/jetbrains/build/test-results

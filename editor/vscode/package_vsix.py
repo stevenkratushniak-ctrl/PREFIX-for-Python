@@ -50,13 +50,11 @@ def _manifest(package: dict[str, object]) -> str:
     <DisplayName>{escape(str(package['displayName']))}</DisplayName>
     <Description xml:space="preserve">{escape(str(package['description']))}</Description>
     <Categories>{escape(categories)}</Categories>
-    <GalleryFlags>Public</GalleryFlags>
     <Properties>
       <Property Id="Microsoft.VisualStudio.Code.Engine" Value="{escape(str(package['engines']['vscode']))}" />
       <Property Id="Microsoft.VisualStudio.Code.ExtensionKind" Value="workspace" />
       <Property Id="Microsoft.VisualStudio.Code.ExecutesCode" Value="true" />
       <Property Id="Microsoft.VisualStudio.Services.GitHubFlavoredMarkdown" Value="true" />
-      <Property Id="Microsoft.VisualStudio.Services.Content.Pricing" Value="Free" />
     </Properties>
     <License>extension/LICENSE.txt</License>
   </Metadata>

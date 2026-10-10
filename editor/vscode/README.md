@@ -1,82 +1,61 @@
-# PREFIX for Python VS Code Extension
+# PREFIX for Python
 
-`PREFIX for Python` applies deterministic Python prefix correction inside VS Code on Windows x64 and Linux amd64.
+**Local, deterministic correction for a bounded set of Python 3.12 structural mistakes.**
 
-It does not autocomplete. It does not infer intent from the cloud. It sends Python text to the local `prefix-python` engine, applies a mapped `ALWAYS_SAFE` correction when one lawful continuation exists, and refuses when the state is ambiguous or unsupported.
+PREFIX applies a mapped structural correction when the engine can prove one safe continuation. It refuses ambiguous, semantic and unsupported states. The existing qualified correction adapter and its response validation are preserved.
 
-The extension now reflects the Python lane model directly:
+**Publication review candidate.** Live activation and fulfillment for this commercial integration remain unverified. The existing Lemon Squeezy offer describes the qualified keyless 77d742f customer bundle; this candidate must not replace that delivery without final qualification and release authority.
 
-- `APPLY` for singular lawful Python continuation
-- `ADVISE` for ranked Python recommendations with zero mutation
-- `ANALYZE` for bounded explanation without mutation
-- `ROADMAP` for known but not-yet-shipped Python surfaces
+## One product, one purchase
 
-## Commands
+The extension interface is free to install. The PREFIX engine is one **$29 USD, one-time** product. The CLI and supported editor adapters use that same engine and commercial entitlement; there is no separate VS Code purchase.
 
-- `PREFIX: Govern Active Python Transition`
-- `PREFIX: Govern Selected Python Structure`
-- `PREFIX: Show Last Transition Governance Surface`
+[Buy PREFIX for Python — $29 once](https://fastlaunch.lemonsqueezy.com/checkout/buy/37f6bf48-4f0d-4151-a076-8b60f030e985) · [Product page](https://fast-industries-prefix.steven-k-ratushniak.chatgpt.site/prefix/)
 
-## Enter-Triggered Flow
+## Supported setup
 
-When `prefixPython.enableOnEnter` is enabled, PREFIX evaluates Python structure after Enter inserts a newline.
+- Windows x64 or Linux amd64.
+- CPython >=3.12,<3.13.
+- Desktop VS Code >=1.85 with the locally installed PREFIX engine.
+- Browser-only VS Code, macOS, ARM64 and other Python minor versions are outside the 0.1.0 support claim.
+- Open VSX client compatibility requires testing the exact client; registry compatibility is not a qualification claim for every editor.
 
-The Enter-triggered surface is intentionally narrow and Python-only:
+Install the PREFIX engine package for your operating system, then install this extension. PREFIX discovers its installed runtime automatically. If you deliberately use an alternate supported engine installation, set `prefixPython.pythonCommand` to that CPython 3.12 executable.
 
-- one cursor only
-- one newline insertion only
-- no hidden selection expansion
-- no multiline continuation guessing
-- no triple-quoted-string mutation
-- mapped missing-colon block headers only
+## Use PREFIX
 
-Within that bounded surface:
+Open a Python document and run:
 
-- already lawful state: no mutation
-- mapped `ALWAYS_SAFE` block-header state: correction applies immediately
-- ranked continuation state: advice is surfaced locally and no mutation occurs
-- ambiguous or unsupported state: refusal or analysis is surfaced locally and no mutation occurs
+- `PREFIX: Govern Active Python Transition` for the active document.
+- `PREFIX: Govern Selected Python Structure` for one explicit selection.
+- `PREFIX: Show Last Transition Governance Surface` to inspect the latest outcome.
 
-If PREFIX inserts `pass` to keep the document parse-valid on Enter, the inserted `pass` token is selected so the operator can replace it immediately with the intended block body.
+The existing Enter integration evaluates only its mapped, bounded line-local correction surface. Enable or disable it with `prefixPython.enableOnEnter`.
 
-## Requirements
+Mapped corrections include missing block colons, mapped block indentation and empty bodies, mapped unmatched delimiters, a mapped single extra closing delimiter, and safe indentation-tab normalization. PREFIX preserves literal data and refuses corrections outside that boundary. It is not a general semantic debugger or code generator. Review applied changes.
 
-- CPython 3.12.x
-- `prefix-python` installed locally
+## Activation in this candidate
 
-Validated release runtimes include bundled CPython 3.12.10 on Windows and CPython 3.12.3 on hosted Ubuntu Linux.
+Run `PREFIX: Activate License` and paste the purchased PREFIX key into the masked input box. The extension passes the key to the shared engine through standard input. It does not place the key in a process command line.
 
-The current release is intentionally pinned to the Python 3.12 AST authority surface. Python 3.11, 3.13, and 3.14 are not public compatibility targets for this release. Python 3.13 and 3.14 require separate AST authority catalogs before support can be claimed.
+Run `PREFIX: License Status` to check this installation, `PREFIX: Deactivate This Installation` to release it, or `PREFIX: Buy PREFIX — $29 Once` to open the established checkout.
 
-## Local Setup
+Activation needs network access. Correction runs locally using the existing cached-entitlement policy. Failed, absent, corrupt or expired entitlement refuses commercial correction without altering your Python source. Live issuance of compatible keys for this candidate is a publication blocker, so do not assume the currently published keyless bundle requires this activation step.
 
-The Windows and Linux PREFIX installers install this extension and connect it to the bundled engine automatically. No interpreter setting is required after a normal installation.
+## Demonstration
 
-For source development only:
+[Watch the existing Sarah-narrated PREFIX commercial](https://github.com/stevenkratushniak-ctrl/FastIndustries-Public-Media/releases/download/prefix-77d742f-sarah-commercial-20261004/PREFIX_010_77d742f_LEMON_SQUEEZY_DEMO.mp4).
 
-```text
-cd editor/vscode
-npm ci
-npm run build
-```
+![Real PREFIX Enter correction: a missing colon becomes a colon and an indented pass](assets/actual-enter-demo.gif)
 
-Run the extension against a PREFIX for Python 0.1.0 installation, or install the source into an isolated CPython 3.12 development environment:
+This excerpt shows the existing qualified Enter correction recording. It does not claim a correction latency or demonstrate live commercial activation.
 
-```text
-python3.12 -m pip install .
-```
+The prepared screenshot assets reproduce real qualified Enter and manual-correction recordings. Their owner approval and public-hosting checks remain publication tasks.
 
-## Configuration
+## Privacy and support
 
-`prefixPython.pythonCommand`
+Correction source stays in the local engine. License activation and validation use Lemon Squeezy's licensing API. Local receipts can retain source before and after corrections. Read [PRIVACY.md](PRIVACY.md) and the [published privacy policy](https://fast-industries-prefix.steven-k-ratushniak.chatgpt.site/legal/prefix/privacy/).
 
-- Default: blank (automatic PREFIX runtime discovery)
-- Set an explicit CPython `3.12.x` path only to override the installed PREFIX engine
+Use the [technical issue tracker](https://github.com/stevenkratushniak-ctrl/PREFIX-for-Python/issues) for reproducible problems. For orders and private license questions, reply to the Lemon Squeezy purchase receipt. Keep license keys and private source out of public issues.
 
-## Operational Behavior
-
-- Valid text: no mutation
-- Deterministically correctable text: document or selection is replaced in place under parse/reparse validation
-- Advised text: the extension surfaces the recommendation packet and does not mutate the buffer
-- Analyzed or unsupported text: the extension surfaces the bounded reason and does not mutate the buffer
-- Selection correction requires one explicit Python selection and never widens silently to the full document
+[License](https://fast-industries-prefix.steven-k-ratushniak.chatgpt.site/legal/prefix/license/) · [Terms](https://fast-industries-prefix.steven-k-ratushniak.chatgpt.site/legal/prefix/terms/) · [Refunds](https://fast-industries-prefix.steven-k-ratushniak.chatgpt.site/legal/prefix/refund/) · [Support](SUPPORT.md)

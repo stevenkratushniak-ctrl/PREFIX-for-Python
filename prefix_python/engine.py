@@ -3,8 +3,10 @@ from __future__ import annotations
 import ast
 import builtins
 import hashlib
+import io
 import json
 import re
+import tokenize
 from dataclasses import asdict, dataclass, replace
 
 from .ast_bridge import PYTHON_VERSION_PIN, build_ast_construction_signature, validate_source_text
@@ -197,7 +199,7 @@ def correct_source(source: str, *, max_rounds: int = 8) -> CorrectionResult:
     input_sha256 = _sha256_text(source)
     output_newline = _detect_newline(source)
     normalized = source.replace("\r\n", "\n").replace("\r", "\n")
-    expanded = normalized.expandtabs(4)
+    expanded = _normalize_indentation_tabs(normalized)
     preprocessing_events = tuple(_build_tab_normalization_events(normalized, expanded))
     normalized = expanded
     repair_events: list[CorrectionEvent] = []
@@ -237,8 +239,8 @@ def correct_source(source: str, *, max_rounds: int = 8) -> CorrectionResult:
             if semantic_refusal is not None:
                 return semantic_refusal
 
-            final_source = _restore_newlines(normalized, output_newline)
             accepted_events = tuple(preprocessing_events) + tuple(repair_events)
+            final_source = _restore_newlines(normalized, output_newline) if accepted_events else source
             status = ACCEPT_VALID if final_source == source else ACCEPT_FIXED
             structural_context = _build_structural_context(
                 source=source,
@@ -407,6 +409,43 @@ def correct_source(source: str, *, max_rounds: int = 8) -> CorrectionResult:
         rounds=min(max_rounds, MAX_CORRECTION_ROUNDS),
         input_sha256=input_sha256,
     )
+
+
+def _normalize_indentation_tabs(source: str) -> str:
+    """Normalize indentation only, never literal contents or semantic block depth."""
+    protected_lines: set[int] = set()
+    fstrings: list[int] = []
+    try:
+        for token in tokenize.generate_tokens(io.StringIO(source).readline):
+            if token.type == tokenize.STRING:
+                protected_lines.update(range(token.start[0] + 1, token.end[0] + 1))
+            elif token.type == tokenize.FSTRING_START:
+                fstrings.append(token.start[0])
+            elif token.type == tokenize.FSTRING_END and fstrings:
+                protected_lines.update(range(fstrings.pop() + 1, token.end[0] + 1))
+    except (tokenize.TokenError, IndentationError, SyntaxError):
+        # Incomplete lexical structure cannot justify a whitespace rewrite.
+        return source
+    if fstrings:
+        return source
+    lines = source.splitlines(keepends=True)
+    for index, line in enumerate(lines, 1):
+        if index in protected_lines:
+            continue
+        indent = re.match(r"[ \t]*", line).group(0)
+        lines[index - 1] = indent.expandtabs(4) + line[len(indent):]
+    expanded = "".join(lines)
+    if expanded != source:
+        try:
+            original_tree = ast.parse(source)
+        except SyntaxError:
+            return expanded
+        try:
+            if ast.dump(original_tree) != ast.dump(ast.parse(expanded)):
+                return source
+        except SyntaxError:
+            return source
+    return expanded
 
 
 def _semantic_gate(

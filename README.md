@@ -1,8 +1,14 @@
 # PREFIX for Python
 
+This checkout is the PREFIX-DISTRIBUTION-001 technical candidate built on the
+qualified 77d742f source. Its artifact identities differ from the older public
+v0.1.0 release. See DISTRIBUTION_CANDIDATE.md for activation, qualification and
+commercial delivery boundaries. The existing $29 checkout continues to promise
+its qualified keyless download until the owner authorizes any matching change.
+
 `PREFIX for Python` is a deterministic Python prefix layer for bounded correctness.
 
-It operates before failure, before invalidity, and before execution. The engine intercepts a bounded set of invalid Python structural states, applies mapped `ALWAYS_SAFE` corrections when one lawful continuation exists, advises ranked candidates when no singular auto-apply path exists, and refuses the transition when the state is unsupported or unsafe.
+It examines source text before execution. The engine recognizes a bounded set of Python structural errors, applies mapped deterministic corrections, advises ranked candidates where automatic correction is not justified, and refuses unsupported cases. `ALWAYS_SAFE` is an internal rule classification, not a guarantee of program intent, correctness, or absence of bugs.
 
 This repository is the sealed standalone product root for the Python release only. It does not depend on remote inference, cloud routing, or probabilistic repair.
 
@@ -16,7 +22,7 @@ This repository is the sealed standalone product root for the Python release onl
 - before debugging burden accrues
 - inside Python only for the current sealed release
 
-This release preserves deterministic correction, finite grammar theory, refusal semantics, anti-hallucination posture, local-first execution, and operational certainty.
+This release provides deterministic structural correction, explicit refusals, and local-first processing. It does not execute or prove the business logic of the code being examined.
 
 ## Python Lane Model
 
@@ -65,7 +71,7 @@ It is a deterministic Python prefix layer:
 - empty function or class bodies
 - simple unmatched opening delimiters
 - singular extra closing delimiters
-- tabs normalized to four spaces
+- indentation tabs normalized to four spaces only where literal contents and parse-valid program structure are preserved
 
 Advice and analysis stay separate from apply. Example:
 
@@ -84,7 +90,9 @@ The package metadata requires `>=3.12,<3.13`, and the runtime intentionally refu
 
 ## Install and Start
 
-Download the package for your platform from the 0.1.0 release and extract it.
+Use the exact package and manifest associated with the intended source identity.
+The current purchase delivers the qualified keyless package; activation-gated
+candidate installation is documented in `DISTRIBUTION_CANDIDATE.md`.
 
 On Windows x64, double-click:
 
@@ -135,7 +143,7 @@ prefix-python --replay-receipt .prefix-python-receipts\<receipt>.json --json
 
 Receipt-backed `--apply`, `--inspect-receipt`, `--replay-receipt`, and `--rollback` operations remain local and deterministic. PREFIX refuses symbolic-link writes and unsupported or ambiguous repairs instead of guessing.
 
-For source verification, use CPython 3.12 and run `python -m unittest discover -s tests -q` from the repository root.
+For source verification, use CPython 3.12 and run `python tools/run_distribution_tests.py` from the repository root. It uses a temporary synthetic entitlement; no provider activation occurs.
 
 ## VS Code Extension
 

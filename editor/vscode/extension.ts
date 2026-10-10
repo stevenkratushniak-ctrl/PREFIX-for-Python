@@ -8,6 +8,7 @@ import {
     EngineResponse,
     isAdvisedOutcome,
     shouldApplyMutation,
+    validateEngineResponse,
 } from "./response";
 
 export type PrefixExtensionApi = {
@@ -76,6 +77,49 @@ export function activate(context: vscode.ExtensionContext) {
         output.show(true);
     });
 
+    const licenseStatus = vscode.commands.registerCommand("prefixPython.licenseStatus", async () => {
+        const result = await runLicenseCommand(["status"], output);
+        if (result) void vscode.window.showInformationMessage(`PREFIX license: ${result.state}. ${result.message}`);
+        return result;
+    });
+
+    const activateLicense = vscode.commands.registerCommand("prefixPython.activateLicense", async () => {
+        const key = await vscode.window.showInputBox({
+            title: "Activate PREFIX — $29 once",
+            prompt: "Paste the PREFIX license key from your purchase",
+            password: true,
+            ignoreFocusOut: true,
+        });
+        if (!key) return;
+        const result = await runLicenseCommand(["activate", "--stdin"], output, key);
+        if (!result) return;
+        if (result.entitled) {
+            setStatus(statusItem, "ready", "PREFIX activated");
+            void vscode.window.showInformationMessage("PREFIX is activated. Keep coding.");
+        } else {
+            setStatus(statusItem, "refused", "Activation required");
+            void vscode.window.showWarningMessage(`PREFIX activation: ${result.message}`);
+        }
+        return result;
+    });
+
+    const deactivateLicense = vscode.commands.registerCommand("prefixPython.deactivateLicense", async () => {
+        const answer = await vscode.window.showWarningMessage("Deactivate PREFIX on this installation?", { modal: true }, "Deactivate");
+        if (answer !== "Deactivate") return;
+        const result = await runLicenseCommand(["deactivate"], output);
+        if (result) void vscode.window.showInformationMessage(result.message);
+        return result;
+    });
+
+    const buyPrefix = vscode.commands.registerCommand("prefixPython.buyPrefix", async () => {
+        const purchaseUrl = vscode.workspace.getConfiguration("prefixPython").get<string>("purchaseUrl", "https://fastlaunch.lemonsqueezy.com/checkout/buy/37f6bf48-4f0d-4151-a076-8b60f030e985").trim();
+        if (!purchaseUrl) {
+            void vscode.window.showWarningMessage("PREFIX purchase URL is not configured in this pre-publication build.");
+            return;
+        }
+        await vscode.env.openExternal(vscode.Uri.parse(purchaseUrl));
+    });
+
     const onDidChange = vscode.workspace.onDidChangeTextDocument(async (event) => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
@@ -112,7 +156,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(output, statusItem, correctDocument, correctSelection, showGovernanceSurface, onDidChange);
+    context.subscriptions.push(output, statusItem, correctDocument, correctSelection, showGovernanceSurface, licenseStatus, activateLicense, deactivateLicense, buyPrefix, onDidChange);
 
     const api: PrefixExtensionApi = {
         getLastEngineError: () => extensionState.lastEngineError,
@@ -142,8 +186,6 @@ async function applyCorrection(
         return null;
     }
 
-    inFlightDocuments.add(documentKey);
-    setStatus(statusItem, "working");
     const selection = editor.selection;
     if (selectionOnly && selection.isEmpty) {
         setStatus(statusItem, "refused", "Selection correction requires explicit text");
@@ -152,6 +194,9 @@ async function applyCorrection(
         }
         return null;
     }
+    inFlightDocuments.add(documentKey);
+    setStatus(statusItem, "working");
+    const sourceVersion = editor.document.version;
     const source = selectionOnly && !selection.isEmpty
         ? editor.document.getText(selection)
         : editor.document.getText();
@@ -160,6 +205,13 @@ async function applyCorrection(
         const response = await runEngine(source, editor.document.uri.fsPath, output);
         if (!response) {
             setStatus(statusItem, "refused", "Engine unavailable");
+            return null;
+        }
+        if (editor.document.isClosed || editor.document.version !== sourceVersion) {
+            extensionState.lastOutcome = null;
+            extensionState.lastEngineError = "document_changed: PREFIX kept your newer edits. Run the correction again on the current text.";
+            output.appendLine(extensionState.lastEngineError);
+            setStatus(statusItem, "refused", extensionState.lastEngineError);
             return null;
         }
         extensionState.lastEngineError = null;
@@ -219,7 +271,7 @@ async function applyCorrection(
             return buildWhySurface(response).lines;
         }
 
-        await editor.edit((editBuilder) => {
+        const applied = await editor.edit((editBuilder) => {
             if (selectionOnly && !selection.isEmpty) {
                 editBuilder.replace(selection, response.source);
                 return;
@@ -231,6 +283,14 @@ async function applyCorrection(
             );
             editBuilder.replace(fullRange, response.source);
         });
+
+        if (!applied) {
+            extensionState.lastOutcome = null;
+            extensionState.lastEngineError = "edit_not_applied: VS Code declined the edit. No correction was committed.";
+            output.appendLine(extensionState.lastEngineError);
+            setStatus(statusItem, "refused", extensionState.lastEngineError);
+            return null;
+        }
 
         if (invocationSurface === "enter" && enterPlan) {
             placeEnterSelection(editor, response, enterPlan);
@@ -286,12 +346,28 @@ async function runEngine(
         let stdout = "";
         let stderr = "";
 
+        child.stdin.on("error", (error) => {
+            if (settled) { return; }
+            settled = true;
+            clearTimeout(timeoutHandle);
+            child.kill();
+            extensionState.lastEngineError = `PREFIX engine input failed: ${error.message}`;
+            resolve(null);
+        });
+
         child.stdout.on("data", (chunk) => {
             stdout += chunk.toString();
+            if (Buffer.byteLength(stdout, "utf8") > 16 * 1024 * 1024 && !settled) {
+                settled = true;
+                clearTimeout(timeoutHandle);
+                child.kill();
+                extensionState.lastEngineError = "PREFIX engine response exceeded the 16 MiB boundary.";
+                resolve(null);
+            }
         });
 
         child.stderr.on("data", (chunk) => {
-            stderr += chunk.toString();
+            if (stderr.length < 65536) { stderr += chunk.toString().slice(0, 65536 - stderr.length); }
         });
 
         child.on("error", (error) => {
@@ -319,12 +395,11 @@ async function runEngine(
             }
 
             try {
-                const parsed = JSON.parse(stdout) as EngineResponse;
+                const parsed = validateEngineResponse(JSON.parse(stdout), source);
                 resolve(parsed);
             } catch {
                 const message = `PREFIX returned an unreadable response from ${formatInvocation(invocation)}. Confirm that the configured runtime is CPython 3.12 with PREFIX for Python installed.`;
                 extensionState.lastEngineError = message;
-                output.appendLine(stdout.trim());
                 output.appendLine(message);
                 output.show(true);
                 void vscode.window.showErrorMessage(message);
@@ -467,4 +542,25 @@ function setStatus(
                 : "PREFIX for Python\nNo lawful deterministic continuation was available.";
             return;
     }
+}
+
+
+type LicenseStatus = { state: string; entitled: boolean; message: string };
+
+async function runLicenseCommand(args: string[], output: vscode.OutputChannel, input?: string): Promise<LicenseStatus | null> {
+    const invocation = resolvePythonInvocation(vscode.workspace.getConfiguration("prefixPython").get<string>("pythonCommand", ""));
+    return new Promise((resolve) => {
+        const child = spawn(invocation.command, [...invocation.prefixArgs, "-m", "prefix_python", "license", ...args, "--json"], { shell: false });
+        let stdout = ""; let stderr = "";
+        child.stdout.on("data", (chunk) => stdout += chunk.toString());
+        child.stderr.on("data", (chunk) => stderr += chunk.toString());
+        child.on("error", (error) => { output.appendLine(`PREFIX licensing could not start: ${error.message}`); resolve(null); });
+        child.on("close", () => {
+            if (stderr.trim()) output.appendLine(stderr.trim());
+            try { resolve(JSON.parse(stdout) as LicenseStatus); }
+            catch { output.appendLine("PREFIX licensing returned an unreadable response."); resolve(null); }
+        });
+        child.stdin.on("error", () => { /* A terminated engine must not expose key bytes in an error. */ });
+        child.stdin.end(input ? `${input}\n` : undefined);
+    });
 }

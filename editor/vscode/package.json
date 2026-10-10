@@ -1,7 +1,7 @@
 {
   "name": "prefix-python",
   "displayName": "PREFIX for Python",
-  "description": "Deterministic Python prefix layer for bounded correctness.",
+  "description": "Local Python 3.12 structural correction with refusal when a safe correction is unavailable. Requires the PREFIX engine ($29 once).",
   "version": "0.1.0",
   "publisher": "fastindustries",
   "engines": {
@@ -9,18 +9,26 @@
   },
   "categories": [
     "Programming Languages",
+    "Linters",
     "Other"
   ],
   "activationEvents": [
     "onCommand:prefixPython.correctDocument",
     "onCommand:prefixPython.correctSelection",
-    "onLanguage:python"
+    "onLanguage:python",
+    "onCommand:prefixPython.licenseStatus",
+    "onCommand:prefixPython.activateLicense",
+    "onCommand:prefixPython.deactivateLicense",
+    "onCommand:prefixPython.buyPrefix"
   ],
   "files": [
     "LICENSE.txt",
     "out/**",
-    "extension.ts",
     "README.md",
+    "CHANGELOG.md",
+    "SUPPORT.md",
+    "PRIVACY.md",
+    "assets/**",
     "package.json"
   ],
   "main": "./out/extension.js",
@@ -37,6 +45,22 @@
       {
         "command": "prefixPython.showGovernanceSurface",
         "title": "PREFIX: Show Last Transition Governance Surface"
+      },
+      {
+        "command": "prefixPython.licenseStatus",
+        "title": "PREFIX: License Status"
+      },
+      {
+        "command": "prefixPython.activateLicense",
+        "title": "PREFIX: Activate License"
+      },
+      {
+        "command": "prefixPython.deactivateLicense",
+        "title": "PREFIX: Deactivate This Installation"
+      },
+      {
+        "command": "prefixPython.buyPrefix",
+        "title": "PREFIX: Buy PREFIX — $29 Once"
       }
     ],
     "configuration": {
@@ -51,6 +75,11 @@
           "type": "boolean",
           "default": true,
           "description": "When enabled, PREFIX evaluates mapped ALWAYS_SAFE Python prefix corrections after Enter inserts a newline."
+        },
+        "prefixPython.purchaseUrl": {
+          "type": "string",
+          "default": "https://fastlaunch.lemonsqueezy.com/checkout/buy/37f6bf48-4f0d-4151-a076-8b60f030e985",
+          "description": "The established PREFIX for Python checkout: $29 USD, one-time."
         }
       }
     },
@@ -69,11 +98,47 @@
   "scripts": {
     "build": "node node_modules/typescript/bin/tsc -p .",
     "package": "python package_vsix.py",
-    "test:behavior": "node response.test.js"
+    "test:behavior": "node response.test.js",
+    "vscode:prepublish": "npm run build"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
     "@types/vscode": "^1.85.0",
     "typescript": "^5.4.5"
-  }
+  },
+  "keywords": [
+    "python",
+    "deterministic",
+    "syntax",
+    "correction",
+    "local",
+    "offline",
+    "refusal",
+    "vscode"
+  ],
+  "pricing": "Free",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stevenkratushniak-ctrl/PREFIX-for-Python"
+  },
+  "homepage": "https://github.com/stevenkratushniak-ctrl/PREFIX-for-Python",
+  "bugs": {
+    "url": "https://github.com/stevenkratushniak-ctrl/PREFIX-for-Python/issues"
+  },
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "galleryBanner": {
+    "color": "#111B2E",
+    "theme": "dark"
+  },
+  "extensionKind": [
+    "workspace"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false,
+      "description": "PREFIX invokes the locally installed Python engine in this workspace."
+    },
+    "virtualWorkspaces": false
+  },
+  "icon": "assets/prefix-icon.png"
 }
