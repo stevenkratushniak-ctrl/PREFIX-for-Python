@@ -1,9 +1,10 @@
 # PREFIX for Python
 
-This checkout is the private 0.1.0 customer-qualification repair candidate. Its
-source identity and package hashes differ from the public v0.1.0 release. See
-`FINAL_RELEASE_NOTES.md` and the candidate's accompanying qualification record;
-historical platform results below are retained evidence, not new test results.
+This checkout is the PREFIX-DISTRIBUTION-001 technical candidate built on the
+qualified 77d742f source. Its artifact identities differ from the older public
+v0.1.0 release. See DISTRIBUTION_CANDIDATE.md for activation, qualification and
+commercial delivery boundaries. The existing $29 checkout continues to promise
+its qualified keyless download until the owner authorizes any matching change.
 
 `PREFIX for Python` is a deterministic Python prefix layer for bounded correctness.
 
@@ -89,7 +90,9 @@ The package metadata requires `>=3.12,<3.13`, and the runtime intentionally refu
 
 ## Install and Start
 
-Download the package for your platform from the 0.1.0 release and extract it.
+Use the exact package and manifest associated with the intended source identity.
+The current purchase delivers the qualified keyless package; activation-gated
+candidate installation is documented in `DISTRIBUTION_CANDIDATE.md`.
 
 On Windows x64, double-click:
 
@@ -140,7 +143,7 @@ prefix-python --replay-receipt .prefix-python-receipts\<receipt>.json --json
 
 Receipt-backed `--apply`, `--inspect-receipt`, `--replay-receipt`, and `--rollback` operations remain local and deterministic. PREFIX refuses symbolic-link writes and unsupported or ambiguous repairs instead of guessing.
 
-For source verification, use CPython 3.12 and run `python -m unittest discover -s tests -q` from the repository root.
+For source verification, use CPython 3.12 and run `python tools/run_distribution_tests.py` from the repository root. It uses a temporary synthetic entitlement; no provider activation occurs.
 
 ## VS Code Extension
 

@@ -78,7 +78,7 @@ exec "$INSTALL_ROOT/runtime/prefix-python-python" -m prefix_python "\$@"
 EOF
 cat > "$STAGE/bin/prefix-python-ops" <<EOF
 #!/usr/bin/env sh
-exec "$INSTALL_ROOT/runtime/prefix-python-python" -m prefix_python.operator_console "\$@"
+exec "$INSTALL_ROOT/runtime/prefix-python-python" -m prefix_python.commercial_operator_console "\$@"
 EOF
 cat > "$STAGE/bin/prefix-python-demo" <<EOF
 #!/usr/bin/env sh
@@ -87,10 +87,12 @@ EOF
 chmod 0755 "$STAGE/bin/prefix-python" "$STAGE/bin/prefix-python-ops" "$STAGE/bin/prefix-python-demo"
 
 PYTHONPATH="$STAGE/lib" "$PYTHON" -m prefix_python --version | grep '0.1.0' >/dev/null || fail "the bundled engine version smoke check failed."
-SMOKE=$(printf 'if ready\nprint("launch")\n' | PYTHONPATH="$STAGE/lib" "$PYTHON" -m prefix_python --stdin --json)
-printf '%s' "$SMOKE" | "$PYTHON" -c 'import json,sys; p=json.load(sys.stdin); raise SystemExit(0 if p.get("status")=="ACCEPT_FIXED" and "if ready:" in p.get("source", "") else 1)' || fail "the correction smoke check failed."
+SMOKE_EXIT=0
+SMOKE=$(printf 'if ready\nprint("launch")\n' | PYTHONPATH="$STAGE/lib" "$PYTHON" -m prefix_python --stdin --json) || SMOKE_EXIT=$?
+printf '%s' "$SMOKE" | "$PYTHON" -c 'import json,sys; p=json.load(sys.stdin); code=int(sys.argv[1]); accepted=code==0 and p.get("status")=="ACCEPT_FIXED" and "if ready:" in p.get("source", ""); denied=code==3 and p.get("refusal_code")=="entitlement_required" and p.get("mutation_performed") is False; raise SystemExit(0 if accepted or denied else 1)' "$SMOKE_EXIT" || fail "the correction smoke check failed."
+SMOKE_STATUS=$(printf '%s' "$SMOKE" | "$PYTHON" -c 'import json,sys; print(json.load(sys.stdin)["status"])')
 
-"$PYTHON" - "$STAGE/install-manifest.json" "$PYTHON" "$WHEEL" "$VSIX" <<'PY'
+"$PYTHON" - "$STAGE/install-manifest.json" "$PYTHON" "$WHEEL" "$VSIX" "$SMOKE_STATUS" <<'PY'
 import json, pathlib, platform, sys
 pathlib.Path(sys.argv[1]).write_text(json.dumps({
     "product": "PREFIX for Python",
@@ -100,7 +102,7 @@ pathlib.Path(sys.argv[1]).write_text(json.dumps({
     "runtime_path": sys.argv[2],
     "wheel": sys.argv[3],
     "vsix": sys.argv[4],
-    "smoke_status": "ACCEPT_FIXED",
+    "smoke_status": sys.argv[5],
 }, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 PY
 
@@ -136,4 +138,5 @@ trap - EXIT HUP INT TERM
 printf '%s\n' "PREFIX for Python $PRODUCT_VERSION is installed."
 printf '%s\n' "Engine: $INSTALL_ROOT/runtime/prefix-python-python"
 printf '%s\n' "Demo: $BIN_ROOT/prefix-python-demo"
+[ "$SMOKE_EXIT" -ne 3 ] || printf '%s\n' "Activation is required before correction. Run prefix-python license activate; its prompt hides the key."
 printf '%s\n' "Open a Python file in VS Code and run 'PREFIX: Govern Active Python Transition'."

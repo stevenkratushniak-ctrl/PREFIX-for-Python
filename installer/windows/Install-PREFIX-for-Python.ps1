@@ -108,7 +108,7 @@ try {
     $BinRoot = Join-Path $StageRoot "bin"
     New-Item -ItemType Directory -Path $BinRoot -Force | Out-Null
     "@echo off`r`n`"%~dp0..\runtime\python.exe`" -m prefix_python %*`r`n" | Set-Content -LiteralPath (Join-Path $BinRoot "prefix-python.cmd") -Encoding Ascii
-    "@echo off`r`n`"%~dp0..\runtime\python.exe`" -m prefix_python.operator_console %*`r`n" | Set-Content -LiteralPath (Join-Path $BinRoot "prefix-python-ops.cmd") -Encoding Ascii
+    "@echo off`r`n`"%~dp0..\runtime\python.exe`" -m prefix_python.commercial_operator_console %*`r`n" | Set-Content -LiteralPath (Join-Path $BinRoot "prefix-python-ops.cmd") -Encoding Ascii
 
     $versionOutput = & $Python -m prefix_python --version 2>&1
     if ($LASTEXITCODE -ne 0 -or $versionOutput -notmatch "0\.1\.0") {
@@ -116,9 +116,11 @@ try {
     }
     # Use the hash-verified UTF-8 demo file; shell pipe encodings can prepend a BOM.
     $smokeOutput = & $Python -m prefix_python (Join-Path $Assets "broken_missing_colon.txt") --json 2>&1
-    if ($LASTEXITCODE -ne 0) { Stop-Install "the correction smoke check failed: $smokeOutput" }
+    $smokeExitCode = $LASTEXITCODE
     $smoke = $smokeOutput | ConvertFrom-Json
-    if ($smoke.status -ne "ACCEPT_FIXED" -or $smoke.source -notmatch "if ready:") {
+    $acceptedSmoke = $smokeExitCode -eq 0 -and $smoke.status -eq "ACCEPT_FIXED" -and $smoke.source -match "if ready:"
+    $unactivatedSmoke = $smokeExitCode -eq 3 -and $smoke.refusal_code -eq "entitlement_required" -and $smoke.mutation_performed -eq $false
+    if (-not ($acceptedSmoke -or $unactivatedSmoke)) {
         Stop-Install "the correction smoke check returned an unexpected result."
     }
 
@@ -154,14 +156,17 @@ try {
 
     $finalPython = Join-Path $InstallRoot "runtime\python.exe"
     $finalSmokeOutput = & $finalPython -m prefix_python (Join-Path $InstallRoot "assets\broken_missing_colon.txt") --json 2>&1
-    if ($LASTEXITCODE -ne 0) { Stop-Install "the installed-engine restart smoke check failed: $finalSmokeOutput" }
+    $finalSmokeExitCode = $LASTEXITCODE
     $finalSmoke = $finalSmokeOutput | ConvertFrom-Json
-    if ($finalSmoke.status -ne "ACCEPT_FIXED") { Stop-Install "the installed-engine restart smoke check failed." }
+    $acceptedRestart = $finalSmokeExitCode -eq 0 -and $finalSmoke.status -eq "ACCEPT_FIXED"
+    $unactivatedRestart = $finalSmokeExitCode -eq 3 -and $finalSmoke.refusal_code -eq "entitlement_required" -and $finalSmoke.mutation_performed -eq $false
+    if (-not ($acceptedRestart -or $unactivatedRestart)) { Stop-Install "the installed-engine restart smoke check failed." }
     if (Test-Path -LiteralPath $BackupRoot) { Remove-Item -LiteralPath $BackupRoot -Recurse -Force }
 
     Write-Host "PREFIX for Python $ProductVersion is installed." -ForegroundColor Green
     Write-Host "VS Code extension: $ExtensionId" -ForegroundColor Green
     Write-Host "Engine: $finalPython" -ForegroundColor Green
+    if ($unactivatedRestart) { Write-Host "Activation is required before correction. Use the installed prefix-python command with 'license activate'; its prompt hides the key." -ForegroundColor Cyan }
     Write-Host "Open a Python file in VS Code and use 'PREFIX: Govern Active Python Transition'." -ForegroundColor Cyan
     exit 0
 } catch {

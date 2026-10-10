@@ -14,3 +14,13 @@ qualification/_cache/
 qualification/write_test.tmp
 release/
 installer/_payload/
+
+qualification-results/
+
+distribution-artifacts/
+
+qualification-tools/
+
+editor/jetbrains/.gradle/
+
+prefix-distribution-001-*.zip

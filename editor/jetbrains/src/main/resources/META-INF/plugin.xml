@@ -1,0 +1,30 @@
+<idea-plugin>
+  <id>com.fastindustries.prefix.python.jetbrains</id>
+  <name>PREFIX for Python</name>
+  <vendor>Fast Industries</vendor>
+  <depends>com.intellij.modules.platform</depends>
+  <depends>com.intellij.modules.python</depends>
+  <extensions defaultExtensionNs="com.intellij">
+    <enterHandlerDelegate implementation="com.fastindustries.prefix.jetbrains.PrefixEnterDelegate"/>
+    <notificationGroup id="PREFIX for Python" displayType="BALLOON"/>
+  </extensions>
+  <actions>
+    <group id="PrefixPython.Menu" text="PREFIX for Python" popup="true">
+      <add-to-group group-id="ToolsMenu" anchor="last"/>
+      <reference ref="PrefixPython.GovernDocument"/>
+      <reference ref="PrefixPython.GovernSelection"/>
+      <separator/>
+      <action id="PrefixPython.ActivateLicense" class="com.fastindustries.prefix.jetbrains.ActivateLicenseAction" text="Activate License"/>
+      <action id="PrefixPython.LicenseStatus" class="com.fastindustries.prefix.jetbrains.LicenseStatusAction" text="License Status"/>
+      <action id="PrefixPython.ValidateLicense" class="com.fastindustries.prefix.jetbrains.ValidateLicenseAction" text="Validate License"/>
+      <action id="PrefixPython.DeactivateLicense" class="com.fastindustries.prefix.jetbrains.DeactivateLicenseAction" text="Deactivate This Installation"/>
+      <action id="PrefixPython.BuyPrefix" class="com.fastindustries.prefix.jetbrains.BuyPrefixAction" text="Purchase PREFIX"/>
+    </group>
+    <action id="PrefixPython.GovernDocument"
+            class="com.fastindustries.prefix.jetbrains.GovernDocumentAction"
+            text="PREFIX: Govern Active Python Transition"/>
+    <action id="PrefixPython.GovernSelection"
+            class="com.fastindustries.prefix.jetbrains.GovernSelectionAction"
+            text="PREFIX: Govern Selected Python Structure"/>
+  </actions>
+</idea-plugin>

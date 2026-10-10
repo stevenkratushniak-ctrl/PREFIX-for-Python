@@ -28,6 +28,19 @@ RECEIPT_VERSION = "1.0.0"
 
 
 def main(argv: list[str] | None = None) -> int:
+    # The installed console script and python -m entry point share this gate.
+    from .entitlement_cli import main as license_main
+    from .entitlement_gate import gate
+    arguments = list(sys.argv[1:] if argv is None else argv)
+    if arguments and arguments[0] == "license":
+        return license_main(arguments[1:])
+    refusal = gate(arguments)
+    if refusal is not None:
+        return refusal
+    return _correction_main(arguments)
+
+
+def _correction_main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="prefix-python",
         description="Deterministic Python prefix layer for bounded correctness.",

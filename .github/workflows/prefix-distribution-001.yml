@@ -1,0 +1,81 @@
+name: PREFIX distribution candidate build and qualification
+on:
+  push:
+    branches: [codex/prefix-distribution-001]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install --disable-pip-version-check setuptools wheel
+      - name: Compile source for parity with the completed official VSIX
+        working-directory: editor/vscode
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run build
+          npm run test:behavior
+      - name: Assemble exact candidate using retained platform builders
+        run: python qualification/build_distribution_candidate.py --output distribution-artifacts
+      - name: Retain exact candidate in unpublished technical staging
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python qualification/store_distribution_build.py --kind packages --paths distribution-artifacts
+
+  qualify:
+    needs: build
+    if: github.event.repository.private == false
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2025, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Download the exact draft build archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download prefix-distribution-001-review --repo stevenkratushniak-ctrl/PREFIX-for-Python --pattern prefix-distribution-001-${{ github.run_id }}-${{ github.run_attempt }}-packages.zip
+      - name: Extract sealed candidate inputs
+        run: python -m zipfile -e prefix-distribution-001-${{ github.run_id }}-${{ github.run_attempt }}-packages.zip .
+      - name: Install Linux editor host prerequisites
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb dbus-x11 libxkbfile1 libgbm1 libasound2t64
+      - name: Source regressions with temporary synthetic entitlement
+        shell: bash
+        run: |
+          mkdir -p qualification-results
+          PREFIX_TEST_RESULT_JSON="$PWD/qualification-results/regressions.json" python tools/run_distribution_tests.py
+      - name: Actual clean wheel and platform installer tests
+        run: python qualification/run_distribution_installation.py --artifacts distribution-artifacts --output qualification-results/installation
+      - name: Actual extension host twice with the same wheel and VSIX
+        if: always()
+        run: python qualification/run_distribution_vscode.py --wheel distribution-artifacts/prefix_python-0.1.0-py3-none-any.whl --vsix distribution-artifacts/prefix-python-0.1.0.vsix --output qualification-results/vscode
+      - name: Retain qualification receipts in unpublished technical staging
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python qualification/store_distribution_build.py --kind proof-${{ matrix.os }} --paths qualification-results/regressions.json qualification-results/installation/installation-result.json qualification-results/vscode/distribution-vscode-result.json qualification-results/vscode/vscode-host.json qualification-results/vscode/host-case-report.json
